@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.25)
+project(Viztui)
+
+set(CMAKE_CXX_STANDARD 11)
+
+add_executable(Viztui main.cpp)
+target_link_libraries(Viztui -lopengl32 -lglu32 -lfreeglut)
