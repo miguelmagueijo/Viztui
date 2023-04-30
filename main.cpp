@@ -1,4 +1,7 @@
 #include <GL/freeglut.h>
+#include "./Bullets/TestBullet.h"
+
+TestBullet* a = new TestBullet();
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -27,6 +30,8 @@ GLvoid draw(GLvoid) {
 
     // Load identity matrix
     glLoadIdentity();
+
+    a->draw();
 
     // Set Projection Type - 2D orthogonal
     gluOrtho2D(-20.0, 20.0, -20.0, 20.0);
