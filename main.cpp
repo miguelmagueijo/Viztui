@@ -1,7 +1,7 @@
-#include <GL/freeglut.h>
-#include "./Bullets/TestBullet.h"
+#include "Viztui.lib.h"
+#include "./PlayerShip/PlayerShip.h"
 
-TestBullet* a = new TestBullet();
+PlayerShip* playerShip = new PlayerShip(0.0f, 0.0f);
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -9,12 +9,12 @@ GLvoid drawAxis() {
 
     glBegin(GL_LINES); {
         glVertex2f(0.0f, 0.0f);
-        glVertex2f(0.0f, 3.0f);
+        glVertex2f(0.0f, 10.0f);
     } glEnd();
 
     glBegin(GL_LINES); {
         glVertex2f(0.0f, 0.0f);
-        glVertex2f(3.0f, 0.0f);
+        glVertex2f(10.0f, 0.0f);
     } glEnd();
 }
 
@@ -31,16 +31,16 @@ GLvoid draw(GLvoid) {
     // Load identity matrix
     glLoadIdentity();
 
-    a->draw();
-
     // Set Projection Type - 2D orthogonal
-    gluOrtho2D(-20.0, 20.0, -20.0, 20.0);
+    gluOrtho2D(-100.0, 100.0, -100.0, 100.0);
 
     // Select modelview matrix
     glMatrixMode(GL_MODELVIEW);
 
     // load identity matrix
     glLoadIdentity();
+
+    playerShip->draw();
 
     drawAxis();
 
@@ -63,7 +63,7 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(20, 20);
 
     // Define Window Size
-    glutInitWindowSize(500, 500);
+    glutInitWindowSize(750, 750);
 
     // Create Window with Name
     glutCreateWindow("Geometric Transformations");
