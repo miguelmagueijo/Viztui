@@ -1,9 +1,11 @@
 #include "Viztui.lib.h"
 #include "./PlayerShip/PlayerShip.h"
 #include "./Bullet/PlayerBullet.h"
+#include "./Enemy/SoldierTransporter.h"
 
 PlayerShip* playerShip = new PlayerShip(0.0f, 0.0f);
 PlayerBullet* playerBullet = new PlayerBullet(0.0f, 0.0f);
+SoldierTransporter* soldierTransporter = new SoldierTransporter(0.0f, 0.0f);
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -43,7 +45,8 @@ GLvoid draw(GLvoid) {
     glLoadIdentity();
 
     //playerShip->draw();
-    playerBullet->draw();
+    //playerBullet->draw();
+    soldierTransporter->draw();
 
     drawAxis();
 
@@ -54,7 +57,7 @@ GLvoid keyboard(unsigned char key, int x, int y) {
     if (key == 27)
         exit(0);
 }
-
+#include "./Enemy/SoldierTransporter.h"
 int main(int argc, char** argv) {
     // Init Window System
     glutInit(&argc, argv);

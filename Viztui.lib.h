@@ -9,6 +9,8 @@
 #include <iostream>
 #include <vector>
 
+enum MOVE_DIRECTIONS { UP, DOWN, LEFT, RIGHT };
+
 // Freeglut / OpenGL imports that depend on Operating System
 // Support only for Windows and macOS
 #if defined(_WIN32) || defined(_WIN64)
