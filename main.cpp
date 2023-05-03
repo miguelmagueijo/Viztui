@@ -1,7 +1,9 @@
 #include "Viztui.lib.h"
 #include "./PlayerShip/PlayerShip.h"
+#include "./Bullet/PlayerBullet.h"
 
 PlayerShip* playerShip = new PlayerShip(0.0f, 0.0f);
+PlayerBullet* playerBullet = new PlayerBullet(0.0f, 0.0f);
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -9,12 +11,12 @@ GLvoid drawAxis() {
 
     glBegin(GL_LINES); {
         glVertex2f(0.0f, 0.0f);
-        glVertex2f(0.0f, 10.0f);
+        glVertex2f(0.0f, 50.0f);
     } glEnd();
 
     glBegin(GL_LINES); {
         glVertex2f(0.0f, 0.0f);
-        glVertex2f(10.0f, 0.0f);
+        glVertex2f(50.0f, 0.0f);
     } glEnd();
 }
 
@@ -40,7 +42,8 @@ GLvoid draw(GLvoid) {
     // load identity matrix
     glLoadIdentity();
 
-    playerShip->draw();
+    //playerShip->draw();
+    playerBullet->draw();
 
     drawAxis();
 
