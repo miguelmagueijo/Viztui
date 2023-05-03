@@ -21,7 +21,7 @@ private:
 
 public:
     SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
-    SoldierTransporter();
+    SoldierTransporter(GLvoid);
     SoldierTransporter(GLfloat x, GLfloat y);
     SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed);
 

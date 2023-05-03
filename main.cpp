@@ -2,10 +2,12 @@
 #include "./PlayerShip/PlayerShip.h"
 #include "./Bullet/PlayerBullet.h"
 #include "./Enemy/SoldierTransporter.h"
+#include "./Enemy/Fighter.h"
 
-PlayerShip* playerShip = new PlayerShip(0.0f, 0.0f);
-PlayerBullet* playerBullet = new PlayerBullet(0.0f, 0.0f);
-SoldierTransporter* soldierTransporter = new SoldierTransporter(0.0f, 0.0f);
+PlayerShip* playerShip = new PlayerShip(0, 0);
+PlayerBullet* playerBullet = new PlayerBullet(0, 0);
+SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
+Fighter* enemyFighter = new Fighter(0, 0);
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -46,7 +48,8 @@ GLvoid draw(GLvoid) {
 
     //playerShip->draw();
     //playerBullet->draw();
-    soldierTransporter->draw();
+    //soldierTransporter->draw();
+    enemyFighter->draw();
 
     drawAxis();
 

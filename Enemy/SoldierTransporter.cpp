@@ -14,7 +14,7 @@ SoldierTransporter::SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfl
     this->hp = hp;
 }
 
-SoldierTransporter::SoldierTransporter() : SoldierTransporter(0, 0, 2, 30) {}
+SoldierTransporter::SoldierTransporter(GLvoid) : SoldierTransporter(0, 0, 2, 30) {}
 
 SoldierTransporter::SoldierTransporter(GLfloat x, GLfloat y) : SoldierTransporter(x, y, 2, 30) {}
 
