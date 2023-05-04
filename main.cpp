@@ -3,11 +3,13 @@
 #include "./Bullet/PlayerBullet.h"
 #include "./Enemy/SoldierTransporter.h"
 #include "./Enemy/Fighter.h"
+#include "./Enemy/MineTransporter.h"
 
-PlayerShip* playerShip = new PlayerShip(0, 0);
-PlayerBullet* playerBullet = new PlayerBullet(0, 0);
+PlayerShip* playerShip = new PlayerShip(0, -50);
+PlayerBullet* playerBullet = new PlayerBullet(0, -30);
 SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
-Fighter* enemyFighter = new Fighter(0, 0);
+Fighter* enemyFighter = new Fighter(-30, 0);
+MineTransporter* mineTransporter = new MineTransporter(30, 0);
 
 // Function that draws cartesian axis
 GLvoid drawAxis() {
@@ -46,10 +48,11 @@ GLvoid draw(GLvoid) {
     // load identity matrix
     glLoadIdentity();
 
-    //playerShip->draw();
-    //playerBullet->draw();
-    //soldierTransporter->draw();
+    playerShip->draw();
+    playerBullet->draw();
+    soldierTransporter->draw();
     enemyFighter->draw();
+    mineTransporter->draw();
 
     drawAxis();
 
