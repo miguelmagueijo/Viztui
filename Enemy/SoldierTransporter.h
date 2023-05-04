@@ -24,6 +24,7 @@ public:
     SoldierTransporter(GLvoid);
     SoldierTransporter(GLfloat x, GLfloat y);
     SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed);
+    ~SoldierTransporter();
 
     GLvoid draw(GLvoid);
     GLvoid move(MOVE_DIRECTIONS dir);

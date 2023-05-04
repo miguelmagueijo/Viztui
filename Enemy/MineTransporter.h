@@ -25,6 +25,7 @@ public:
     MineTransporter(GLvoid);
     MineTransporter(GLfloat x, GLfloat y);
     MineTransporter(GLfloat x, GLfloat y, GLfloat speed);
+    ~MineTransporter();
 
     GLvoid draw(GLvoid);
     GLvoid move(MOVE_DIRECTIONS dir);

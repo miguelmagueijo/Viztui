@@ -27,6 +27,7 @@ public:
     Fighter(GLvoid);
     Fighter(GLfloat x, GLfloat y);
     Fighter(GLfloat x, GLfloat y, GLfloat speed);
+    ~Fighter();
 
     GLvoid draw(GLvoid);
     GLvoid move(MOVE_DIRECTIONS dir);

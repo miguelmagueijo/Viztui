@@ -20,6 +20,8 @@ SoldierTransporter::SoldierTransporter(GLfloat x, GLfloat y) : SoldierTransporte
 
 SoldierTransporter::SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed) : SoldierTransporter(x, y, speed, 30) {}
 
+SoldierTransporter::~SoldierTransporter() {}
+
 GLvoid SoldierTransporter::body(GLvoid) {
     glColor3f(0.87f, 0.44f, 0.44f);
 
@@ -123,3 +125,5 @@ GLvoid SoldierTransporter::takeDamage(GLfloat dmg) {
 GLboolean SoldierTransporter::isAlive(GLvoid) {
     return this->hp > 0;
 }
+
+

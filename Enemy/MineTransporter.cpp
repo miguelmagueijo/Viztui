@@ -20,6 +20,8 @@ MineTransporter::MineTransporter(GLfloat x, GLfloat y) : MineTransporter(x, y, 2
 
 MineTransporter::MineTransporter(GLfloat x, GLfloat y, GLfloat speed) : MineTransporter(x, y, speed, 20) {}
 
+MineTransporter::~MineTransporter() {}
+
 GLvoid MineTransporter::body(GLvoid) {
     glColor3f(0.87f, 0.44f, 0.44f);
 

@@ -20,6 +20,8 @@ Fighter::Fighter(GLfloat x, GLfloat y) : Fighter(x, y, 2, 30) {}
 
 Fighter::Fighter(GLvoid) : Fighter(0, 0, 2, 30) {}
 
+Fighter::~Fighter() {}
+
 GLvoid Fighter::body(GLvoid) {
     glColor3f(0.87f, 0.44f, 0.44f);
 
