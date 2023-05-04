@@ -4,8 +4,8 @@
 
 #include "PlayerShip.h"
 
-// Ratio of 4:3
-GLfloat playerShipSize[2] = { 40.0f, 30.0f };
+// Size ratio is 40:30 (4:3)
+GLfloat playerShipSize[2] = { 30.0f, 22.5f };
 
 PlayerShip::PlayerShip() {
     this->speed = 1.5f;

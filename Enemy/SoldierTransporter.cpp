@@ -57,7 +57,7 @@ GLvoid SoldierTransporter::draw(GLvoid) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - soldierTransporterSize[0] / 2, this->position[1] - soldierTransporterSize[0] / 2, 0);
+    glTranslatef(this->position[0] - soldierTransporterSize[0] / 2, this->position[1] - soldierTransporterSize[1] / 2, 0);
 
     glPushMatrix();
 
