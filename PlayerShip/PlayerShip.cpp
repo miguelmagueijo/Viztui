@@ -28,7 +28,7 @@ GLvoid PlayerShip::body(GLvoid) {
 }
 
 GLvoid PlayerShip::cockpit(GLvoid) {
-    glColor3f(0.0f, 0.0f, 1.0f);
+    glColor3f(0.34f, 0.60f, 1.00f);
 
     glBegin(GL_QUADS); {
         glVertex2f(0.0f, 0.0f);
