@@ -118,3 +118,43 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPopMatrix();
     glPopMatrix();
 }
+
+GLboolean PlayerShip::move(MOVE_DIRECTIONS dir) {
+    GLboolean hasMoved = false;
+
+    switch(dir) {
+        case MOVE_DIRECTIONS::UP:
+            this->position[1] += this->speed;
+            break;
+        case MOVE_DIRECTIONS::DOWN:
+            this->position[1] -= this->speed;
+            break;
+        case MOVE_DIRECTIONS::LEFT:
+            this->position[0] -= this->speed;
+            break;
+        case MOVE_DIRECTIONS::RIGHT:
+            this->position[0] += this->speed;
+            break;
+    }
+
+    return hasMoved;
+}
+
+GLvoid PlayerShip::receiveHp(GLint hp) {
+    this->hp += hp;
+
+    if (this->hp > PlayerShip::maxHp)
+        this->hp = PlayerShip::maxHp;
+}
+
+GLvoid PlayerShip::takeDamage(GLint dmg) {
+    this->hp -= dmg;
+}
+
+GLboolean PlayerShip::isAlive() {
+    this->hp > 0;
+}
+
+GLfloat* PlayerShip::getPosition() {
+    return this->position;
+}

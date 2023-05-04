@@ -8,6 +8,8 @@
 // Left, Right, Bottom, Up
 const GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 
+GLboolean needsDraw = false;
+
 PlayerShip* playerShip = new PlayerShip(0, -50);
 PlayerBullet* playerBullet = new PlayerBullet(0, -30);
 SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
@@ -62,32 +64,52 @@ GLvoid draw(GLvoid) {
     glutSwapBuffers();
 }
 
+GLvoid idle(GLvoid) {
+
+
+    if (needsDraw) {
+        glutPostRedisplay();
+        needsDraw = false;
+    }
+}
+
 GLvoid keyboard(unsigned char key, int x, int y) {
+    switch(key) {
+        case 27:
+            exit(0); // no need for break because exits program
+        case 'W':
+        case 'w':
+            playerShip->move();
+    }
+
     if (key == 27)
         exit(0);
 }
-#include "./Enemy/SoldierTransporter.h"
+
 int main(int argc, char** argv) {
-    // Init Window System
+    // Init glut environment
     glutInit(&argc, argv);
 
     // Define Display Mode
-    glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
-    // Define Window Start Position
+    // Set window initial position
     glutInitWindowPosition(20, 20);
 
-    // Define Window Size
+    // Set window size
     glutInitWindowSize(850, 850);
 
-    // Create Window with Name
+    // Create window and set title
     glutCreateWindow("Viztui - The Space War");
 
-    // set display callback
+    // Set display callback
     glutDisplayFunc(draw);
 
-    // set keyboard callback
+    // Set keyboard callback
     glutKeyboardFunc(keyboard);
+
+    // Set idle function
+    glutIdleFunc();
 
     // run main loop
     glutMainLoop();

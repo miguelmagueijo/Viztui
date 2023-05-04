@@ -11,9 +11,12 @@ extern GLfloat playerShipSize[2];
 
 class PlayerShip {
 private:
+    const static GLint maxHp = 5;
+
     GLfloat position[2]; // X and Y coords
     GLfloat speed;
-    GLint lives;
+    GLint hp;
+
 
     GLvoid body(GLvoid);
     GLvoid cockpit(GLvoid);
@@ -26,10 +29,13 @@ public:
     PlayerShip(GLfloat x, GLfloat y);
     PlayerShip(GLfloat x, GLfloat y, GLfloat speed);
     PlayerShip(GLfloat x, GLfloat y, GLint lives);
-    PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLint lives);
+    PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLint hp);
     ~PlayerShip();
     GLvoid draw(GLvoid);
-    GLvoid move(GLint);
+    GLboolean move(MOVE_DIRECTIONS dir);
+    GLvoid receiveHp(GLint hp);
+    GLvoid takeDamage(GLint dmg);
+    GLboolean isAlive();
     GLfloat* getPosition(GLvoid);
 };
 
