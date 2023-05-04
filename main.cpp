@@ -5,6 +5,9 @@
 #include "./Enemy/Fighter.h"
 #include "./Enemy/MineTransporter.h"
 
+// Left, Right, Bottom, Up
+const GLfloat worldBorders[4] = { -125, 125, -125, 125 };
+
 PlayerShip* playerShip = new PlayerShip(0, -50);
 PlayerBullet* playerBullet = new PlayerBullet(0, -30);
 SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
@@ -40,7 +43,7 @@ GLvoid draw(GLvoid) {
     glLoadIdentity();
 
     // Set Projection Type - 2D orthogonal
-    gluOrtho2D(-100.0, 100.0, -100.0, 100.0);
+    gluOrtho2D(worldBorders[0], worldBorders[1], worldBorders[2], worldBorders[3]);
 
     // Select modelview matrix
     glMatrixMode(GL_MODELVIEW);
@@ -75,10 +78,10 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(20, 20);
 
     // Define Window Size
-    glutInitWindowSize(750, 750);
+    glutInitWindowSize(850, 850);
 
     // Create Window with Name
-    glutCreateWindow("Geometric Transformations");
+    glutCreateWindow("Viztui - The Space War");
 
     // set display callback
     glutDisplayFunc(draw);
