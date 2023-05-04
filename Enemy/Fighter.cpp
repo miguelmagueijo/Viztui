@@ -104,3 +104,32 @@ GLvoid Fighter::draw(GLvoid) {
     glPopMatrix();
     glPopMatrix();
 }
+
+GLvoid Fighter::move(MOVE_DIRECTIONS dir) {
+    switch(dir) {
+        case MOVE_DIRECTIONS::UP:
+            this->position[1] += this->speed;
+            break;
+        case MOVE_DIRECTIONS::DOWN:
+            this->position[1] -= this->speed;
+            break;
+        case MOVE_DIRECTIONS::LEFT:
+            this->position[0] -= this->speed;
+            break;
+        case MOVE_DIRECTIONS::RIGHT:
+            this->position[0] += this->speed;
+            break;
+    }
+}
+
+GLfloat* Fighter::getPosition(GLvoid) {
+    return this->position;
+}
+
+GLvoid Fighter::takeDamage(GLfloat dmg) {
+    this->hp -= dmg;
+}
+
+GLboolean Fighter::isAlive(GLvoid) {
+    return this->hp > 0;
+}
