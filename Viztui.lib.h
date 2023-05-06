@@ -9,15 +9,18 @@
 #include <iostream>
 #include <vector>
 
-enum MOVE_DIRECTIONS { UP, DOWN, LEFT, RIGHT };
-
 // Freeglut / OpenGL imports that depend on Operating System
 // Support only for Windows and macOS
 #if defined(_WIN32) || defined(_WIN64)
-    #include <GL/freeglut.h>
+#include <GL/freeglut.h>
 #elif defined(__APPLE__) || defined(__MACH__) || defined(TARGET_OS_MAC)
-    #include <OpenGL/OpenGL.h>
+#include <OpenGL/OpenGL.h>
     #include <GLUT/glut.h>
 #endif
+
+extern const GLfloat worldBorders[4];
+
+enum MOVE_DIRECTIONS { UP, DOWN, LEFT, RIGHT };
+
 
 #endif //VIZTUI_VIZTUI_LIB_H

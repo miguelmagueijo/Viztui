@@ -54,10 +54,10 @@ GLvoid draw(GLvoid) {
     glLoadIdentity();
 
     playerShip->draw();
-    playerBullet->draw();
-    soldierTransporter->draw();
-    enemyFighter->draw();
-    mineTransporter->draw();
+    //playerBullet->draw();
+    //soldierTransporter->draw();
+    //enemyFighter->draw();
+    //mineTransporter->draw();
 
     drawAxis();
 
@@ -65,12 +65,11 @@ GLvoid draw(GLvoid) {
 }
 
 GLvoid idle(GLvoid) {
-
-
     if (needsDraw) {
         glutPostRedisplay();
         needsDraw = false;
     }
+
 }
 
 GLvoid keyboard(unsigned char key, int x, int y) {
@@ -79,11 +78,21 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             exit(0); // no need for break because exits program
         case 'W':
         case 'w':
-            playerShip->move();
+            needsDraw = playerShip->move(MOVE_DIRECTIONS::UP);
+            break;
+        case 'S':
+        case 's':
+            needsDraw = playerShip->move(MOVE_DIRECTIONS::DOWN);
+            break;
+        case 'A':
+        case 'a':
+            needsDraw = playerShip->move(MOVE_DIRECTIONS::LEFT);
+            break;
+        case 'D':
+        case 'd':
+            needsDraw = playerShip->move(MOVE_DIRECTIONS::RIGHT);
+            break;
     }
-
-    if (key == 27)
-        exit(0);
 }
 
 int main(int argc, char** argv) {
@@ -109,7 +118,7 @@ int main(int argc, char** argv) {
     glutKeyboardFunc(keyboard);
 
     // Set idle function
-    glutIdleFunc();
+    glutIdleFunc(idle);
 
     // run main loop
     glutMainLoop();

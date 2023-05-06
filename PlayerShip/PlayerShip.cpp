@@ -5,7 +5,9 @@
 #include "PlayerShip.h"
 
 // Size ratio is 40:30 (4:3)
-GLfloat playerShipSize[2] = { 30.0f, 22.5f };
+const GLfloat playerShipSize[2] = { 30.0f, 22.5f };
+// Better use more memory than doing the division all the time it needs it
+const GLfloat playerShipHalfSize[2] = { playerShipSize[0] / 2, playerShipSize[1] / 2 };
 
 PlayerShip::PlayerShip() {
     this->speed = 1.5f;
@@ -23,7 +25,7 @@ GLvoid PlayerShip::body(GLvoid) {
     glBegin(GL_TRIANGLES); {
         glVertex2f(0.0f, 0.0f);
         glVertex2f(playerShipSize[0] / 4.0f, playerShipSize[1]);
-        glVertex2f(playerShipSize[0] / 2.0f, 0);
+        glVertex2f(playerShipHalfSize[0], 0);
     } glEnd();
 }
 
@@ -42,9 +44,9 @@ GLvoid PlayerShip::leftWing(GLvoid) {
     glColor3f(0.0, 1.0f, 0.0f);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(playerShipSize[0] / 2.0f, 0.0f);
-        glVertex2f(0, playerShipSize[1] / 2.0f);
-        glVertex2f(playerShipSize[0] / 2.0f, playerShipSize[1] / 2.0f);
+        glVertex2f(playerShipHalfSize[0], 0.0f);
+        glVertex2f(0, playerShipHalfSize[1]);
+        glVertex2f(playerShipHalfSize[0], playerShipHalfSize[1]);
     } glEnd();
 }
 
@@ -53,8 +55,8 @@ GLvoid PlayerShip::rightWing(GLvoid) {
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0.0f, 0.0f);
-        glVertex2f(0, playerShipSize[1] / 2.0f);
-        glVertex2f(playerShipSize[0] / 2.0f, playerShipSize[1] / 2.0f);
+        glVertex2f(0, playerShipHalfSize[1]);
+        glVertex2f(playerShipHalfSize[0], playerShipHalfSize[1]);
     } glEnd();
 }
 
@@ -74,11 +76,10 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPushMatrix();
 
     // Translation for body component / center of ship
-    glTranslatef(this->position[0] - playerShipSize[0] / 4.0f, this->position[1] - playerShipSize[1] / 2.0f, 0.0f);
+    glTranslatef(this->position[0] - playerShipHalfSize[0], this->position[1] - playerShipHalfSize[1], 0);
     glPushMatrix();
 
-    // Left wing translation and draw
-    glTranslatef(-(playerShipSize[0] / 4.0f), 0.0f, 0.0f);
+    // Draw left wing
     this->leftWing();
 
     // Pop current matrix and create new one
@@ -86,33 +87,34 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPushMatrix();
 
     // Right wing translation and draw
-    glTranslatef(playerShipSize[0] / 4.0f, 0.0f, 0.0f);
+    glTranslatef(playerShipHalfSize[0], 0, 0);
     this->rightWing();
 
-    // Pop current matrix and create new one
     glPopMatrix();
     glPushMatrix();
 
-    // Body drawn, it's here because of wings overlapping if they are drawn after body
+    // Body draw, it's here because of wings overlapping if they are drawn after body
+    glTranslatef(playerShipSize[0] / 4, 0, 0);
     this->body();
 
-    // Pop current matrix and create new one
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(playerShipSize[0] / 5.0f, playerShipSize[1] * 1.1f / 3.0f, 0.0f);
+    glTranslatef(playerShipSize[0] * 9 / 20, playerShipSize[1] * 11 / 30, 0.0f);
     this->cockpit();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(-(playerShipSize[0] * 0.1f / 4.0f), playerShipSize[1] / 2.0f, 0.0f);
+    // Left cannon draw
+    glTranslatef(playerShipSize[0] * 9 / 40, playerShipHalfSize[1], 0.0f);
     this->cannon();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(playerShipSize[0] * 1.7f / 4.0f, playerShipSize[1] / 2.0f, 0.0f);
+    // Right cannon draw
+    glTranslatef(playerShipSize[0] * 27 / 40, playerShipHalfSize[1], 0.0f);
     this->cannon();
 
     glPopMatrix();
@@ -124,16 +126,28 @@ GLboolean PlayerShip::move(MOVE_DIRECTIONS dir) {
 
     switch(dir) {
         case MOVE_DIRECTIONS::UP:
-            this->position[1] += this->speed;
+            if (this->position[1] + playerShipHalfSize[1] + this->speed < worldBorders[3]) {
+                this->position[1] += this->speed;
+                hasMoved = true;
+            }
             break;
         case MOVE_DIRECTIONS::DOWN:
-            this->position[1] -= this->speed;
+            if (this->position[1] - playerShipHalfSize[1] - this->speed > worldBorders[2]) {
+                this->position[1] -= this->speed;
+                hasMoved = true;
+            }
             break;
         case MOVE_DIRECTIONS::LEFT:
-            this->position[0] -= this->speed;
+            if (this->position[0] - playerShipHalfSize[0] - this->speed > worldBorders[0]) {
+                this->position[0] -= this->speed;
+                hasMoved = true;
+            }
             break;
         case MOVE_DIRECTIONS::RIGHT:
-            this->position[0] += this->speed;
+            if (this->position[0] + playerShipHalfSize[0] + this->speed < worldBorders[1]) {
+                this->position[0] += this->speed;
+                hasMoved = true;
+            }
             break;
     }
 

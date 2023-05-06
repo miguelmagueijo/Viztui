@@ -7,7 +7,8 @@
 
 #include "../Viztui.lib.h"
 
-extern GLfloat playerShipSize[2];
+extern const GLfloat playerShipSize[2];
+extern const GLfloat playerShipHalfSize[2];
 
 class PlayerShip {
 private:
