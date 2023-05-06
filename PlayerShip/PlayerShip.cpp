@@ -75,6 +75,10 @@ GLvoid PlayerShip::draw(GLvoid) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
+    //glTranslatef(-this->position[0], -this->position[1], 0);
+    //glRotatef(this->currentAngle, 0, 0, 1);
+    //glTranslatef(this->position[0], this->position[1], 0);
+
     // Translation for body component / center of ship
     glTranslatef(this->position[0] - playerShipHalfSize[0], this->position[1] - playerShipHalfSize[1], 0);
     glPushMatrix();
@@ -87,6 +91,7 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPushMatrix();
 
     // Right wing translation and draw
+
     glTranslatef(playerShipHalfSize[0], 0, 0);
     this->rightWing();
 
@@ -95,6 +100,7 @@ GLvoid PlayerShip::draw(GLvoid) {
 
     // Body draw, it's here because of wings overlapping if they are drawn after body
     glTranslatef(playerShipSize[0] / 4, 0, 0);
+
     this->body();
 
     glPopMatrix();
@@ -151,6 +157,8 @@ GLboolean PlayerShip::move(MOVE_DIRECTIONS dir) {
             break;
     }
 
+    std::cout << this->position[1] << std::endl;
+
     return hasMoved;
 }
 
@@ -171,4 +179,17 @@ GLboolean PlayerShip::isAlive() {
 
 GLfloat* PlayerShip::getPosition() {
     return this->position;
+}
+
+GLvoid PlayerShip::rotate(GLboolean isCW) {
+    if (isCW)
+        this->currentAngle += 90;
+    else
+        this->currentAngle -= 90;
+
+    if (abs(this->currentAngle) >= 360) {
+        this->currentAngle = 0;
+    }
+
+    std::cout << this->currentAngle << std::endl;
 }

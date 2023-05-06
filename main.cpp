@@ -10,7 +10,7 @@ const GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 
 GLboolean needsDraw = false;
 
-PlayerShip* playerShip = new PlayerShip(0, -50);
+PlayerShip* playerShip = new PlayerShip(0, 0);
 PlayerBullet* playerBullet = new PlayerBullet(0, -30);
 SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
 Fighter* enemyFighter = new Fighter(-30, 0);
@@ -91,6 +91,16 @@ GLvoid keyboard(unsigned char key, int x, int y) {
         case 'D':
         case 'd':
             needsDraw = playerShip->move(MOVE_DIRECTIONS::RIGHT);
+            break;
+        case 'Q':
+        case 'q':
+            playerShip->rotate(true);
+            needsDraw = true;
+            break;
+        case 'E':
+        case 'e':
+            playerShip->rotate(false);
+            needsDraw = true;
             break;
     }
 }

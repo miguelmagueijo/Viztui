@@ -7,13 +7,14 @@
 
 #include "../Viztui.lib.h"
 
-extern const GLfloat playerShipSize[2];
-extern const GLfloat playerShipHalfSize[2];
+const extern GLfloat playerShipSize[2];
+const extern GLfloat playerShipHalfSize[2];
 
 class PlayerShip {
 private:
     const static GLint maxHp = 5;
 
+    GLint currentAngle = 0;
     GLfloat position[2]; // X and Y coords
     GLfloat speed;
     GLint hp;
@@ -38,6 +39,7 @@ public:
     GLvoid takeDamage(GLint dmg);
     GLboolean isAlive();
     GLfloat* getPosition(GLvoid);
+    GLvoid rotate(GLboolean isCW);
 };
 
 
