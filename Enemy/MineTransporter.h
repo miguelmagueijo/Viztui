@@ -6,32 +6,20 @@
 #define VIZTUI_MINETRANSPORTER_H
 
 #include "../Viztui.lib.h"
+#include "Enemy.h"
 
-extern GLfloat mineTransporterSize[2];
-
-class MineTransporter {
+class MineTransporter : Enemy {
 private:
-    GLfloat position[2] {0.0f, 0.0f};
-    GLfloat speed;
-    GLfloat hp;
-
-    GLvoid body(GLvoid);
-    GLvoid cockpit(GLvoid);
-    GLvoid wing(GLvoid);
-    GLvoid mine(GLvoid);
+    GLvoid body();
+    GLvoid cockpit();
+    GLvoid wing();
+    GLvoid mine();
 
 public:
     MineTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
-    MineTransporter(GLvoid);
-    MineTransporter(GLfloat x, GLfloat y);
-    MineTransporter(GLfloat x, GLfloat y, GLfloat speed);
-    ~MineTransporter();
+    ~MineTransporter() = default;
 
-    GLvoid draw(GLvoid);
-    GLvoid move(MOVE_DIRECTIONS dir);
-    GLfloat* getPosition(GLvoid);
-    GLvoid takeDamage(GLfloat);
-    GLboolean isAlive(GLvoid);
+    GLvoid draw() override;
 };
 
 

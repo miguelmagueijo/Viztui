@@ -34,7 +34,7 @@ public:
     PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLint hp);
     ~PlayerShip();
     GLvoid draw(GLvoid);
-    GLboolean move(MOVE_DIRECTIONS dir);
+    GLboolean move(MOVE_DIRS dir);
     GLvoid receiveHp(GLint hp);
     GLvoid takeDamage(GLint dmg);
     GLboolean isAlive();

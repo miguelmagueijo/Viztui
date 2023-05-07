@@ -127,29 +127,29 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPopMatrix();
 }
 
-GLboolean PlayerShip::move(MOVE_DIRECTIONS dir) {
+GLboolean PlayerShip::move(MOVE_DIRS dir) {
     GLboolean hasMoved = false;
 
     switch(dir) {
-        case MOVE_DIRECTIONS::UP:
+        case MOVE_DIRS::UP:
             if (this->position[1] + playerShipHalfSize[1] + this->speed < worldBorders[3]) {
                 this->position[1] += this->speed;
                 hasMoved = true;
             }
             break;
-        case MOVE_DIRECTIONS::DOWN:
+        case MOVE_DIRS::DOWN:
             if (this->position[1] - playerShipHalfSize[1] - this->speed > worldBorders[2]) {
                 this->position[1] -= this->speed;
                 hasMoved = true;
             }
             break;
-        case MOVE_DIRECTIONS::LEFT:
+        case MOVE_DIRS::LEFT:
             if (this->position[0] - playerShipHalfSize[0] - this->speed > worldBorders[0]) {
                 this->position[0] -= this->speed;
                 hasMoved = true;
             }
             break;
-        case MOVE_DIRECTIONS::RIGHT:
+        case MOVE_DIRS::RIGHT:
             if (this->position[0] + playerShipHalfSize[0] + this->speed < worldBorders[1]) {
                 this->position[0] += this->speed;
                 hasMoved = true;

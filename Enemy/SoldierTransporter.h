@@ -6,31 +6,19 @@
 #define VIZTUI_SOLDIERTRANSPORTER_H
 
 #include "../Viztui.lib.h"
+#include "Enemy.h"
 
-extern GLfloat soldierTransporterSize[2];
-
-class SoldierTransporter {
+class SoldierTransporter : Enemy {
 private:
-    GLfloat position[2] {0.0f, 0.0f};
-    GLfloat speed;
-    GLfloat hp;
-
-    GLvoid body(GLvoid);
-    GLvoid cockpit(GLvoid);
-    GLvoid rocket(GLvoid);
+    GLvoid body();
+    GLvoid cockpit();
+    GLvoid rocket();
 
 public:
     SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
-    SoldierTransporter(GLvoid);
-    SoldierTransporter(GLfloat x, GLfloat y);
-    SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed);
-    ~SoldierTransporter();
+    ~SoldierTransporter() = default;
 
-    GLvoid draw(GLvoid);
-    GLvoid move(MOVE_DIRECTIONS dir);
-    GLfloat* getPosition(GLvoid);
-    GLvoid takeDamage(GLfloat);
-    GLboolean isAlive(GLvoid);
+    GLvoid draw();
 };
 
 

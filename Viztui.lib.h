@@ -19,8 +19,9 @@
 #endif
 
 extern const GLfloat worldBorders[4];
+extern const GLfloat enemySize[2];
 
-enum MOVE_DIRECTIONS { UP, DOWN, LEFT, RIGHT };
+enum MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
 
 
 #endif //VIZTUI_VIZTUI_LIB_H

@@ -7,33 +7,21 @@
 
 
 #include "../Viztui.lib.h"
+#include "Enemy.h"
 
-extern GLfloat fighterSize[2];
-
-class Fighter {
+class Fighter : public Enemy {
 private:
-    GLfloat position[2] {0.0f, 0.0f};
-    GLfloat speed;
-    GLfloat hp;
-
-    GLvoid body(GLvoid);
-    GLvoid cockpit(GLvoid);
-    GLvoid cannon(GLvoid);
-    GLvoid leftWing(GLvoid);
-    GLvoid rightWing(GLvoid);
+    GLvoid body();
+    GLvoid cockpit();
+    GLvoid cannon();
+    GLvoid leftWing();
+    GLvoid rightWing();
 
 public:
     Fighter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
-    Fighter(GLvoid);
-    Fighter(GLfloat x, GLfloat y);
-    Fighter(GLfloat x, GLfloat y, GLfloat speed);
-    ~Fighter();
+    ~Fighter() = default;
 
-    GLvoid draw(GLvoid);
-    GLvoid move(MOVE_DIRECTIONS dir);
-    GLfloat* getPosition(GLvoid);
-    GLvoid takeDamage(GLfloat);
-    GLboolean isAlive(GLvoid);
+    GLvoid draw() override;
 };
 
 
