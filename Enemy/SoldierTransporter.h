@@ -8,7 +8,7 @@
 #include "../Viztui.lib.h"
 #include "Enemy.h"
 
-class SoldierTransporter : Enemy {
+class SoldierTransporter : public Enemy {
 private:
     GLvoid body();
     GLvoid cockpit();
