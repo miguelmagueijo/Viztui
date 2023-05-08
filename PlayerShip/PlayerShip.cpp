@@ -17,6 +17,10 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->bullet = new PlayerBullet();
 }
 
+GLfloat* PlayerShip::getPosition() {
+    return this->position;
+}
+
 GLvoid PlayerShip::body(GLvoid) {
     glColor3f(0.77f, 0.61f, 0.19f);
 

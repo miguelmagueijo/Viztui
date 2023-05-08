@@ -31,12 +31,14 @@ private:
 public:
     PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp);
     ~PlayerShip() = default;
+
+    GLfloat* getPosition(GLvoid);
+
     GLvoid draw(GLvoid);
     GLboolean move(MOVE_DIRS dir);
     GLvoid receiveHp(GLint hp);
     GLvoid takeDamage(GLint dmg);
     GLboolean isAlive();
-    GLfloat* getPosition(GLvoid);
     GLvoid rotate(GLboolean isCW);
     PlayerBullet* fireBullet();
 };
