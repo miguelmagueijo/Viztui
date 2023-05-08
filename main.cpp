@@ -7,18 +7,29 @@
 #include "./Enemy/MineTransporter.h"
 
 // Left, Right, Bottom, Up
+const GLint MAX_ENEMY_COUNT_DOWN = 3;
 const GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 const GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
+const GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
 
+GLboolean frameTimerUp = false;
 GLboolean needsDraw = false;
+GLboolean areEnemiesMovingLeft = false;
+MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
+GLint currEnemyCountDown = 0;
 
-PlayerShip* playerShip = new PlayerShip(0, 0);
+PlayerShip* playerShip = new PlayerShip(0, 0, 4, 3);
 /*PlayerBullet* playerBullet = new PlayerBullet(0, -30);
 SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
 Fighter* enemyFighter = new Fighter(-30, 0);
 MineTransporter* mineTransporter = new MineTransporter(30, 0);*/
 
+/**
+ * BASICAMENTE A CENA DA MINA DO INIMIGO É UM PICK-UP QUE TIRA VIDA
+ */
+
 std::vector<SoldierTransporter*> enemies;
+std::vector<PlayerBullet*> bullets;
 
 GLvoid createEnemies(GLfloat startX, GLfloat startY) {
     enemies.clear();
@@ -87,6 +98,10 @@ GLvoid draw(GLvoid) {
     //enemyFighter->draw();
     //mineTransporter->draw();
 
+    for(PlayerBullet* b : bullets) {
+        b->draw();
+    }
+
     for (SoldierTransporter* e : enemies) {
         e->draw();
     }
@@ -97,6 +112,70 @@ GLvoid draw(GLvoid) {
 }
 
 GLvoid idle(GLvoid) {
+    GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
+    GLfloat* playerShipPosition = playerShip->getPosition();
+    GLfloat* enemyPosition;
+
+    if (frameTimerUp) {
+
+
+        // Enemy collisions
+
+
+        for (Enemy* e : enemies) {
+            enemyPosition = e->getPosition();
+
+            if (enemyPosition[0] - enemyHalfSize[0] < enemyHitbox[0])
+                enemyHitbox[0] = enemyPosition[0] - enemyHalfSize[0];
+
+            if (enemyPosition[0] + enemyHalfSize[0] > enemyHitbox[1])
+                enemyHitbox[1] = enemyPosition[0] + enemyHalfSize[0];
+
+            if (enemyPosition[1] - enemyHalfSize[1] < enemyHitbox[2])
+                enemyHitbox[2] = enemyPosition[1] - enemyHalfSize[1];
+
+            if (enemyPosition[1] - enemyHalfSize[1] > enemyHitbox[3])
+                enemyHitbox[3] = enemyPosition[1] + enemyHalfSize[1];
+
+            if ( !(enemyPosition[1] - enemySize[1] / 2 >= playerShipPosition[1] + playerShipHalfSize[1] || // inimigo min y > player max y
+                   enemyPosition[0] - enemySize[0] / 2 >= playerShipPosition[0] + playerShipHalfSize[0] || // inimigo min x > player max x
+                   enemyPosition[1] + enemySize[1] / 2 <= playerShipPosition[1] - playerShipHalfSize[1] || // inimigo max y < player min y
+                   enemyPosition[0] + enemySize[0] / 2 <= playerShipPosition[0] - playerShipHalfSize[0]) ) { // inimigo max x < player min x
+                std::cout << "Collision between player and enemies" << std::endl;
+                //gameOver = true;
+            }
+        }
+
+        // Collision with borders
+        if ( (!areEnemiesMovingLeft && enemyHitbox[1] + 2 > worldBorders[1]) ||
+             (areEnemiesMovingLeft && enemyHitbox[0] - 2 < worldBorders[0]) ) {
+            currEnemyCountDown++;
+            areEnemiesMovingLeft = !areEnemiesMovingLeft;
+        }
+
+        // Bullets movements
+        for (PlayerBullet* b : bullets) {
+            b->move();
+        }
+
+
+        // Enemies movements
+        if (currEnemyCountDown == MAX_ENEMY_COUNT_DOWN) {
+            enemyMoveDir = MOVE_DIRS::DOWN;
+            currEnemyCountDown = 0;
+        } else {
+            enemyMoveDir = areEnemiesMovingLeft ? MOVE_DIRS::LEFT : MOVE_DIRS::RIGHT;
+        }
+
+        for (Enemy* e : enemies) {
+            e->move(enemyMoveDir);
+        }
+
+
+        frameTimerUp = false;
+        needsDraw = true;
+    }
+
     if (needsDraw) {
         glutPostRedisplay();
         needsDraw = false;
@@ -134,7 +213,18 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             playerShip->rotate(false);
             needsDraw = true;
             break;
+        case ' ':
+            bullets.push_back(playerShip->fireBullet());
     }
+}
+
+GLvoid gameTimer(GLint value) {
+    frameTimerUp = true;
+    glutTimerFunc(16, gameTimer, 0);
+
+    /*if (!gameOver || !gamePaused) {
+        glutTimerFunc(16, gameTimer, 0);
+    }*/
 }
 
 int main(int argc, char** argv) {
@@ -163,6 +253,8 @@ int main(int argc, char** argv) {
 
     // Set idle function
     glutIdleFunc(idle);
+
+    glutTimerFunc(16, gameTimer, 0);
 
     // run main loop
     glutMainLoop();

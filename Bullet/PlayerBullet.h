@@ -11,21 +11,26 @@ extern GLfloat playerBulletSize[2];
 
 class PlayerBullet {
 private:
-    GLfloat position[2];
+    GLfloat position[2] {0, 0};
     GLfloat speed;
     GLfloat damage;
+    MOVE_DIRS dir;
 
-    GLvoid body(GLvoid);
-    GLvoid head(GLvoid);
+    GLvoid body();
+    GLvoid head();
 public:
+    PlayerBullet(GLfloat x, GLfloat y, GLfloat speed, GLfloat dmg, MOVE_DIRS dir);
     PlayerBullet();
-    PlayerBullet(GLfloat, GLfloat);
-    PlayerBullet(GLfloat, GLfloat, GLfloat);
-    PlayerBullet(GLfloat, GLfloat, GLfloat, GLfloat);
-    ~PlayerBullet();
-    GLvoid draw(GLvoid);
-    GLvoid move(GLint);
-    GLfloat* getPosition(GLvoid);
+    ~PlayerBullet() = default;
+
+    GLvoid setPosition(GLfloat x, GLfloat y);
+    GLfloat* getPosition();
+    GLfloat getDamage();
+
+    GLvoid draw();
+    GLvoid move();
+
+    PlayerBullet* clone();
 };
 
 

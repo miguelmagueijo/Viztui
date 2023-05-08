@@ -9,14 +9,12 @@ const GLfloat playerShipSize[2] = { 30.0f, 22.5f };
 // Better use more memory than doing the division all the time it needs it
 const GLfloat playerShipHalfSize[2] = { playerShipSize[0] / 2, playerShipSize[1] / 2 };
 
-PlayerShip::PlayerShip() {
-    this->speed = 1.5f;
-}
-
-PlayerShip::PlayerShip(GLfloat x, GLfloat y) {
+PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->position[0] = x;
     this->position[1] = y;
-    this->speed = 1.5f;
+    this->speed = speed;
+    this->hp = hp;
+    this->bullet = new PlayerBullet();
 }
 
 GLvoid PlayerShip::body(GLvoid) {
@@ -157,8 +155,6 @@ GLboolean PlayerShip::move(MOVE_DIRS dir) {
             break;
     }
 
-    std::cout << this->position[1] << std::endl;
-
     return hasMoved;
 }
 
@@ -192,4 +188,12 @@ GLvoid PlayerShip::rotate(GLboolean isCW) {
     }
 
     std::cout << this->currentAngle << std::endl;
+}
+
+PlayerBullet* PlayerShip::fireBullet() {
+    PlayerBullet* newBullet = this->bullet->clone();
+
+    newBullet->setPosition(this->position[0], this->position[1] + playerShipHalfSize[1] + 2);
+
+    return newBullet;
 }

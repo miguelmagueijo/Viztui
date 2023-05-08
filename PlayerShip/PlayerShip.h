@@ -6,6 +6,7 @@
 #define VIZTUI_PLAYERSHIP_H
 
 #include "../Viztui.lib.h"
+#include "../Bullet/PlayerBullet.h"
 
 const extern GLfloat playerShipSize[2];
 const extern GLfloat playerShipHalfSize[2];
@@ -13,6 +14,7 @@ const extern GLfloat playerShipHalfSize[2];
 class PlayerShip {
 private:
     const static GLint maxHp = 5;
+    PlayerBullet* bullet;
 
     GLint currentAngle = 0;
     GLfloat position[2]; // X and Y coords
@@ -27,12 +29,8 @@ private:
     GLvoid cannon(GLvoid);
 
 public:
-    PlayerShip();
-    PlayerShip(GLfloat x, GLfloat y);
-    PlayerShip(GLfloat x, GLfloat y, GLfloat speed);
-    PlayerShip(GLfloat x, GLfloat y, GLint lives);
-    PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLint hp);
-    ~PlayerShip();
+    PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp);
+    ~PlayerShip() = default;
     GLvoid draw(GLvoid);
     GLboolean move(MOVE_DIRS dir);
     GLvoid receiveHp(GLint hp);
@@ -40,6 +38,7 @@ public:
     GLboolean isAlive();
     GLfloat* getPosition(GLvoid);
     GLvoid rotate(GLboolean isCW);
+    PlayerBullet* fireBullet();
 };
 
 

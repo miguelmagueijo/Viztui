@@ -6,21 +6,30 @@
 
 GLfloat playerBulletSize[2] = { 2, 5};
 
-PlayerBullet::PlayerBullet() {
-    this->position[0] = 0.0f;
-    this->position[1] = 0.0f;
-    this->speed = 2.0f;
-    this->damage = 2.0f;
-}
-
-PlayerBullet::PlayerBullet(GLfloat x, GLfloat y) {
+PlayerBullet::PlayerBullet(GLfloat x, GLfloat y, GLfloat speed, GLfloat dmg, MOVE_DIRS dir) {
     this->position[0] = x;
     this->position[1] = y;
-    this->speed = 2.0f;
-    this->damage = 2.0f;
+    this->speed = speed;
+    this->damage = dmg;
+    this->dir = dir;
 }
 
-GLvoid PlayerBullet::body(GLvoid) {
+PlayerBullet::PlayerBullet() : PlayerBullet(0, 0, 2, 5, MOVE_DIRS::UP) { }
+
+GLvoid PlayerBullet::setPosition(GLfloat x, GLfloat y) {
+    this->position[0] = x;
+    this->position[1] = y;
+}
+
+GLfloat* PlayerBullet::getPosition() {
+    return this->position;
+}
+
+GLfloat PlayerBullet::getDamage() {
+    return this->damage;
+}
+
+GLvoid PlayerBullet::body() {
     glColor3f(0.42f, 0.50f, 0.39f);
 
     glBegin(GL_QUADS); {
@@ -31,7 +40,7 @@ GLvoid PlayerBullet::body(GLvoid) {
     } glEnd();
 }
 
-GLvoid PlayerBullet::head(GLvoid) {
+GLvoid PlayerBullet::head() {
     glColor3f(0.78f, 0.61f, 0.19f);
 
     glBegin(GL_QUADS); {
@@ -42,7 +51,7 @@ GLvoid PlayerBullet::head(GLvoid) {
     } glEnd();
 }
 
-GLvoid PlayerBullet::draw(GLvoid) {
+GLvoid PlayerBullet::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
@@ -56,4 +65,25 @@ GLvoid PlayerBullet::draw(GLvoid) {
 
     glPopMatrix();
     glPopMatrix();
+}
+
+GLvoid PlayerBullet::move() {
+    switch(this->dir) {
+        case MOVE_DIRS::UP:
+            this->position[1] += this->speed;
+            break;
+        case MOVE_DIRS::DOWN:
+            this->position[1] -= this->speed;
+            break;
+        case MOVE_DIRS::LEFT:
+            this->position[0] -= this->speed;
+            break;
+        case MOVE_DIRS::RIGHT:
+            this->position[0] += this->speed;
+            break;
+    }
+}
+
+PlayerBullet* PlayerBullet::clone() {
+    return new PlayerBullet(*this);
 }
