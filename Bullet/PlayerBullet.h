@@ -6,31 +6,18 @@
 #define VIZTUI_PLAYERBULLET_H
 
 #include "../Viztui.lib.h"
+#include "Bullet.h"
 
-extern GLfloat playerBulletSize[2];
-
-class PlayerBullet {
+class PlayerBullet : public Bullet {
 private:
-    GLfloat position[2] {0, 0};
-    GLfloat speed;
-    GLfloat damage;
-    MOVE_DIRS dir;
-
     GLvoid body();
     GLvoid head();
 public:
-    PlayerBullet(GLfloat x, GLfloat y, GLfloat speed, GLfloat dmg, MOVE_DIRS dir);
-    PlayerBullet();
+    PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg);
     ~PlayerBullet() = default;
 
-    GLvoid setPosition(GLfloat x, GLfloat y);
-    GLfloat* getPosition();
-    GLfloat getDamage();
-
-    GLvoid draw();
-    GLvoid move();
-
-    PlayerBullet* clone();
+    GLvoid draw() override;
+    PlayerBullet* clone() override;
 };
 
 

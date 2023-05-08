@@ -1,35 +1,43 @@
 #include "Viztui.lib.h"
 #include "./PlayerShip/PlayerShip.h"
-#include "./Bullet/PlayerBullet.h"
+#include "./Bullet/Bullet.h"
 #include "./Enemy/Enemy.h"
 #include "./Enemy/SoldierTransporter.h"
-#include "./Enemy/Fighter.h"
-#include "./Enemy/MineTransporter.h"
+#include "Bullet/EnemyBullet.h"
+#include <cstdlib>
+#include <time.h>
 
 // Left, Right, Bottom, Up
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
-const GLfloat worldBorders[4] = { -125, 125, -125, 125 };
-const GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
-const GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
+
+// World Border
+GLfloat worldBorders[4] = { -125, 125, -125, 125 };
+
+// Sizes
+GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
+GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
+GLfloat bulletSize[2] = { 2, 5};
+GLfloat bulletHalfSize[2] = { bulletSize[0] / 2, bulletSize[1] / 2 };
 
 GLboolean frameTimerUp = false;
 GLboolean needsDraw = false;
 GLboolean areEnemiesMovingLeft = false;
+GLboolean enemyCanFire = true;
 MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
 
 PlayerShip* playerShip = new PlayerShip(0, 0, 4, 3);
-/*PlayerBullet* playerBullet = new PlayerBullet(0, -30);
-SoldierTransporter* soldierTransporter = new SoldierTransporter(0, 0);
-Fighter* enemyFighter = new Fighter(-30, 0);
-MineTransporter* mineTransporter = new MineTransporter(30, 0);*/
 
 /**
  * BASICAMENTE A CENA DA MINA DO INIMIGO É UM PICK-UP QUE TIRA VIDA
  */
 
 std::vector<SoldierTransporter*> enemies;
-std::vector<PlayerBullet*> bullets;
+std::vector<Bullet*> bullets;
+
+GLvoid enemyFireTimer(GLint value) {
+    enemyCanFire = true;
+}
 
 GLvoid createEnemies(GLfloat startX, GLfloat startY) {
     enemies.clear();
@@ -98,7 +106,7 @@ GLvoid draw(GLvoid) {
     //enemyFighter->draw();
     //mineTransporter->draw();
 
-    for(PlayerBullet* b : bullets) {
+    for(Bullet* b : bullets) {
         b->draw();
     }
 
@@ -113,15 +121,64 @@ GLvoid draw(GLvoid) {
 
 GLvoid idle(GLvoid) {
     GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
-    GLfloat* playerShipPosition = playerShip->getPosition();
-    GLfloat* enemyPosition;
+    GLfloat *playerShipPosition = playerShip->getPosition();
+    GLfloat *enemyPosition, *bulletPosition;
 
     if (frameTimerUp) {
+        // Bullets collisions
+        for (GLint i = 0; i < bullets.size(); i++) {
+            Bullet* b = bullets.at(i);
+            bulletPosition = b->getPosition();
 
+            if (b->isFiredByPlayer()) {
+                GLboolean hasCollided = false;
+                for (GLint j = 0; j < enemies.size(); j++) {
+                    enemyPosition = enemies.at(j)->getPosition();
 
-        // Enemy collisions
+                    if ( !(enemyPosition[1] - enemySize[1] / 2 >= bulletPosition[1] + bulletHalfSize[1] || // inimigo min y > bullet max y
+                           enemyPosition[0] - enemySize[0] / 2 >= bulletPosition[0] + bulletHalfSize[0] || // inimigo min x > bullet max x
+                           enemyPosition[1] + enemySize[1] / 2 <= bulletPosition[1] - bulletHalfSize[1] || // inimigo max y < bullet min y
+                           enemyPosition[0] + enemySize[0] / 2 <= bulletPosition[0] - bulletHalfSize[0]) ) { // inimigo max x < bullet min x
 
+                        std::cout << "Collision bullet with enemy" << std::endl;
 
+                        enemies.erase(enemies.begin() + j);
+                        bullets.erase(bullets.begin() + i);
+
+                        hasCollided = true;
+
+                        break;
+                    }
+                }
+
+                if (hasCollided) continue;
+
+            } else {
+                if (!(playerShipPosition[1] - playerShipHalfSize[1] >= bulletPosition[1] + bulletSize[1] / 2 || // inimigo min y > bullet max y
+                        playerShipPosition[0] - playerShipHalfSize[0] >= bulletPosition[0] + bulletSize[0] / 2 || // inimigo min x > bullet max x
+                        playerShipPosition[1] + playerShipHalfSize[1] <= bulletPosition[1] - bulletSize[1] / 2 || // inimigo max y < bullet min y
+                        playerShipPosition[0] + playerShipHalfSize[0] <= bulletPosition[0] - bulletSize[0] / 2)) {
+
+                    playerShip->takeDamage(static_cast<GLint>(b->getDamage()));
+                    bullets.erase(bullets.begin() + i);
+
+                    if (!playerShip->isAlive())
+                        std::cout << "Player dead" << std::endl;
+
+                    continue;
+                }
+            }
+
+            if (bulletPosition[1] - bulletHalfSize[1] > worldBorders[3] || // bullet min y > world max y
+                    bulletPosition[1] + bulletHalfSize[1] < worldBorders[2] || // bullet max y < world min y
+                    bulletPosition[0] - bulletHalfSize[0] > worldBorders[1] || // bullet min x > world max x
+                    bulletPosition[0] + bulletHalfSize[0] < worldBorders[0]) {
+                bullets.erase(bullets.begin() + i);
+                std::cout << "Bullet removed because collided with border" << std::endl;
+            }
+        }
+
+        // Enemies collisions
         for (Enemy* e : enemies) {
             enemyPosition = e->getPosition();
 
@@ -154,7 +211,7 @@ GLvoid idle(GLvoid) {
         }
 
         // Bullets movements
-        for (PlayerBullet* b : bullets) {
+        for (Bullet* b : bullets) {
             b->move();
         }
 
@@ -169,6 +226,18 @@ GLvoid idle(GLvoid) {
 
         for (Enemy* e : enemies) {
             e->move(enemyMoveDir);
+        }
+
+        if (enemyCanFire && !enemies.empty()) {
+            enemyCanFire = false;
+
+            GLint enemyIndex = rand() % enemies.size();
+
+            enemyPosition = enemies.at(enemyIndex)->getPosition();
+
+            bullets.push_back(new EnemyBullet(enemyPosition[0], enemyPosition[1] + enemyHalfSize[1] + 2, MOVE_DIRS::DOWN, 2, 1));
+
+            glutTimerFunc(2000, enemyFireTimer, 0);
         }
 
 
@@ -227,7 +296,11 @@ GLvoid gameTimer(GLint value) {
     }*/
 }
 
+
+
 int main(int argc, char** argv) {
+    srand(time(NULL));
+
     // Init glut environment
     glutInit(&argc, argv);
 

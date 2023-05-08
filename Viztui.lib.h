@@ -18,8 +18,11 @@
     #include <GLUT/glut.h>
 #endif
 
-extern const GLfloat worldBorders[4];
-extern const GLfloat enemySize[2];
+extern GLfloat worldBorders[4];
+extern GLfloat enemySize[2];
+extern GLfloat enemyHalfSize[2];
+extern GLfloat bulletSize[2];
+extern GLfloat bulletHalfSize[2];
 
 enum MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
 

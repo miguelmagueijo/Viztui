@@ -14,7 +14,7 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->position[1] = y;
     this->speed = speed;
     this->hp = hp;
-    this->bullet = new PlayerBullet();
+    this->bullet = new PlayerBullet(0, 0, MOVE_DIRS::UP, 2, 5);
 }
 
 GLfloat* PlayerShip::getPosition() {
@@ -174,11 +174,7 @@ GLvoid PlayerShip::takeDamage(GLint dmg) {
 }
 
 GLboolean PlayerShip::isAlive() {
-    this->hp > 0;
-}
-
-GLfloat* PlayerShip::getPosition() {
-    return this->position;
+    return this->hp > 0;
 }
 
 GLvoid PlayerShip::rotate(GLboolean isCW) {

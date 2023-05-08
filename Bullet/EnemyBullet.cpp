@@ -1,17 +1,17 @@
 //
-// Created by Miguel Magueijo on 02/05/2023.
+// Created by Miguel Magueijo on 08/05/2023.
 //
 
-#include "PlayerBullet.h"
+#include "EnemyBullet.h"
 
-PlayerBullet::PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg)
-                            : Bullet(x, y, true, dir) {
+EnemyBullet::EnemyBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg)
+        : Bullet(x, y, false, dir) {
     this->setDamage(dmg);
     this->setSpeed(speed);
 }
 
-GLvoid PlayerBullet::body() {
-    glColor3f(0.42f, 0.50f, 0.39f);
+GLvoid EnemyBullet::body() {
+    glColor3f(0.00f, 0.56f, 0.19f);
 
     glBegin(GL_QUADS); {
         glVertex2f(0.0f, 0.0f);
@@ -21,8 +21,8 @@ GLvoid PlayerBullet::body() {
     } glEnd();
 }
 
-GLvoid PlayerBullet::head() {
-    glColor3f(0.78f, 0.61f, 0.19f);
+GLvoid EnemyBullet::head() {
+    glColor3f(0.29f, 0.31f, 0.76f);
 
     glBegin(GL_QUADS); {
         glVertex2f(0.0f, 0.0f);
@@ -32,7 +32,7 @@ GLvoid PlayerBullet::head() {
     } glEnd();
 }
 
-GLvoid PlayerBullet::draw() {
+GLvoid EnemyBullet::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
@@ -48,6 +48,6 @@ GLvoid PlayerBullet::draw() {
     glPopMatrix();
 }
 
-PlayerBullet* PlayerBullet::clone() {
-    return new PlayerBullet(*this);
+EnemyBullet* EnemyBullet::clone() {
+    return new EnemyBullet(*this);
 }
