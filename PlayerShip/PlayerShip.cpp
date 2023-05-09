@@ -21,6 +21,14 @@ GLfloat* PlayerShip::getPosition() {
     return this->position;
 }
 
+GLshort PlayerShip::getHp() {
+    return this->hp;
+}
+
+GLshort PlayerShip::getMaxHp() {
+    return PlayerShip::maxHp;
+}
+
 GLvoid PlayerShip::body(GLvoid) {
     glColor3f(0.77f, 0.61f, 0.19f);
 

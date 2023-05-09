@@ -13,13 +13,13 @@ const extern GLfloat playerShipHalfSize[2];
 
 class PlayerShip {
 private:
-    const static GLint maxHp = 5;
+    const static GLshort maxHp = 5;
     PlayerBullet* bullet;
 
     GLint currentAngle = 0;
     GLfloat position[2]; // X and Y coords
     GLfloat speed;
-    GLint hp;
+    GLshort hp;
 
 
     GLvoid body(GLvoid);
@@ -33,6 +33,8 @@ public:
     ~PlayerShip() = default;
 
     GLfloat* getPosition(GLvoid);
+    GLshort getHp();
+    static GLshort getMaxHp();
 
     GLvoid draw(GLvoid);
     GLboolean move(MOVE_DIRS dir);

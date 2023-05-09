@@ -4,13 +4,16 @@
 #include "./Enemy/Enemy.h"
 #include "./Enemy/SoldierTransporter.h"
 #include "Bullet/EnemyBullet.h"
+#include "Enemy/Fighter.h"
+#include "Menu/MainMenu.h"
+#include "ElementsUI/HpHeart.h"
 #include <cstdlib>
 #include <time.h>
 
-// Left, Right, Bottom, Up
+
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
 
-// World Border
+// World Borders by order Left, Right, Bottom, Up
 GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 
 // Sizes
@@ -19,24 +22,35 @@ GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
 GLfloat bulletSize[2] = { 2, 5};
 GLfloat bulletHalfSize[2] = { bulletSize[0] / 2, bulletSize[1] / 2 };
 
+GLboolean gameOver = false;
 GLboolean frameTimerUp = false;
 GLboolean needsDraw = false;
 GLboolean areEnemiesMovingLeft = false;
+GLboolean playerCanFire = true;
 GLboolean enemyCanFire = true;
 MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
 
-PlayerShip* playerShip = new PlayerShip(0, 0, 4, 3);
+
+PlayerShip* playerShip = new PlayerShip((worldBorders[0] + abs(worldBorders[1] - worldBorders[0]) / 2), ( worldBorders[2] + playerShipSize[1] / 2 ) + 5, 4, 3);
+
+std::vector<HpHeart*> playerHpHeartsUI;
 
 /**
  * BASICAMENTE A CENA DA MINA DO INIMIGO É UM PICK-UP QUE TIRA VIDA
+ * Fazer um metodo que gera inimigos consoante o dado, por linha e colunas
+ * Fazer pickups
  */
 
-std::vector<SoldierTransporter*> enemies;
+std::vector<Enemy*> enemies;
 std::vector<Bullet*> bullets;
 
 GLvoid enemyFireTimer(GLint value) {
     enemyCanFire = true;
+}
+
+GLvoid playerFireTimer(GLint value) {
+    playerCanFire = true;
 }
 
 GLvoid createEnemies(GLfloat startX, GLfloat startY) {
@@ -50,7 +64,7 @@ GLvoid createEnemies(GLfloat startX, GLfloat startY) {
         for (GLint j = 0; j < nCols; j++) {
             // (Ponto inicial ± halfSize) ± ( (size * 2) * col|line)
             enemies.push_back(
-                    new SoldierTransporter(
+                    new Fighter(
                             worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j,
                             worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i,
                             2,
@@ -110,8 +124,12 @@ GLvoid draw(GLvoid) {
         b->draw();
     }
 
-    for (SoldierTransporter* e : enemies) {
+    for (Enemy* e : enemies) {
         e->draw();
+    }
+
+    for (GLshort i = 0; i < playerShip->getHp(); i++) {
+        playerHpHeartsUI.at(i)->draw();
     }
 
     drawAxis();
@@ -141,8 +159,12 @@ GLvoid idle(GLvoid) {
                            enemyPosition[0] + enemySize[0] / 2 <= bulletPosition[0] - bulletHalfSize[0]) ) { // inimigo max x < bullet min x
 
                         std::cout << "Collision bullet with enemy" << std::endl;
+                        Enemy* e = enemies.at(j);
+                        e->takeDamage(b->getDamage());
+                        if (!e->isAlive()) {
+                            enemies.erase(enemies.begin() + j);
+                        }
 
-                        enemies.erase(enemies.begin() + j);
                         bullets.erase(bullets.begin() + i);
 
                         hasCollided = true;
@@ -163,7 +185,7 @@ GLvoid idle(GLvoid) {
                     bullets.erase(bullets.begin() + i);
 
                     if (!playerShip->isAlive())
-                        std::cout << "Player dead" << std::endl;
+                        gameOver = true;
 
                     continue;
                 }
@@ -199,7 +221,7 @@ GLvoid idle(GLvoid) {
                    enemyPosition[1] + enemySize[1] / 2 <= playerShipPosition[1] - playerShipHalfSize[1] || // inimigo max y < player min y
                    enemyPosition[0] + enemySize[0] / 2 <= playerShipPosition[0] - playerShipHalfSize[0]) ) { // inimigo max x < player min x
                 std::cout << "Collision between player and enemies" << std::endl;
-                //gameOver = true;
+                gameOver = true;
             }
         }
 
@@ -235,7 +257,7 @@ GLvoid idle(GLvoid) {
 
             enemyPosition = enemies.at(enemyIndex)->getPosition();
 
-            bullets.push_back(new EnemyBullet(enemyPosition[0], enemyPosition[1] + enemyHalfSize[1] + 2, MOVE_DIRS::DOWN, 2, 1));
+            bullets.push_back(new EnemyBullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN, 2, 1));
 
             glutTimerFunc(2000, enemyFireTimer, 0);
         }
@@ -283,23 +305,35 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             needsDraw = true;
             break;
         case ' ':
-            bullets.push_back(playerShip->fireBullet());
+            if (playerCanFire) {
+                bullets.push_back(playerShip->fireBullet());
+                playerCanFire = false;
+                glutTimerFunc(350, playerFireTimer, 0);
+            }
+
     }
 }
 
 GLvoid gameTimer(GLint value) {
     frameTimerUp = true;
-    glutTimerFunc(16, gameTimer, 0);
 
-    /*if (!gameOver || !gamePaused) {
+    if (!gameOver)
         glutTimerFunc(16, gameTimer, 0);
-    }*/
 }
 
 
 
 int main(int argc, char** argv) {
     srand(time(NULL));
+
+    GLfloat initialHeartsPosition[2] = {
+                                        worldBorders[0] + HpHeart::hpHeartSize[0] + 2,
+                                        worldBorders[2] + HpHeart::hpHeartSize[1] + 2
+                                    };
+    GLfloat spaceXHearts = 2;
+    for (GLshort i = 0; i < PlayerShip::getMaxHp(); i++) {
+        playerHpHeartsUI.push_back(new HpHeart(initialHeartsPosition[0] + (HpHeart::hpHeartSize[0] + spaceXHearts) * i, initialHeartsPosition[1]));
+    }
 
     // Init glut environment
     glutInit(&argc, argv);
