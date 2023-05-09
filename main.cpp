@@ -7,6 +7,7 @@
 #include "Enemy/Fighter.h"
 #include "Menu/MainMenu.h"
 #include "ElementsUI/HpHeart.h"
+#include "Enemy/MineTransporter.h"
 #include <cstdlib>
 #include <time.h>
 
@@ -40,10 +41,13 @@ std::vector<HpHeart*> playerHpHeartsUI;
  * BASICAMENTE A CENA DA MINA DO INIMIGO É UM PICK-UP QUE TIRA VIDA
  * Fazer um metodo que gera inimigos consoante o dado, por linha e colunas
  * Fazer pickups
+ * Usar scale para texto
+ * fazer metodo para dizer se está fora do mundo
  */
 
 std::vector<Enemy*> enemies;
 std::vector<Bullet*> bullets;
+std::vector<Pickup*> pickups;
 
 GLvoid enemyFireTimer(GLint value) {
     enemyCanFire = true;
@@ -64,11 +68,11 @@ GLvoid createEnemies(GLfloat startX, GLfloat startY) {
         for (GLint j = 0; j < nCols; j++) {
             // (Ponto inicial ± halfSize) ± ( (size * 2) * col|line)
             enemies.push_back(
-                    new Fighter(
+                    new MineTransporter(
                             worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j,
                             worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i,
                             2,
-                            30
+                            5
                     )
             );
 
@@ -124,6 +128,10 @@ GLvoid draw(GLvoid) {
         b->draw();
     }
 
+    for (Pickup* p : pickups) {
+        p->draw();
+    }
+
     for (Enemy* e : enemies) {
         e->draw();
     }
@@ -140,7 +148,7 @@ GLvoid draw(GLvoid) {
 GLvoid idle(GLvoid) {
     GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
     GLfloat *playerShipPosition = playerShip->getPosition();
-    GLfloat *enemyPosition, *bulletPosition;
+    GLfloat *enemyPosition, *bulletPosition, *pickupPosition;
 
     if (frameTimerUp) {
         // Bullets collisions
@@ -162,6 +170,11 @@ GLvoid idle(GLvoid) {
                         Enemy* e = enemies.at(j);
                         e->takeDamage(b->getDamage());
                         if (!e->isAlive()) {
+                            Pickup* p = e->getPickup();
+                            if (p != nullptr) {
+                                pickups.push_back(p);
+                            }
+
                             enemies.erase(enemies.begin() + j);
                         }
 
@@ -200,6 +213,35 @@ GLvoid idle(GLvoid) {
             }
         }
 
+        // Pickup collisions
+        for (GLint i = 0; i < pickups.size(); i++) {
+            Pickup* p = pickups.at(i);
+            pickupPosition = p->getPosition();
+
+            if (!(playerShipPosition[1] - playerShipHalfSize[1] >= pickupPosition[1] || // inimigo min y > bullet max y
+                  playerShipPosition[0] - playerShipHalfSize[0] >= pickupPosition[0] || // inimigo min x > bullet max x
+                  playerShipPosition[1] + playerShipHalfSize[1] <= pickupPosition[1] || // inimigo max y < bullet min y
+                  playerShipPosition[0] + playerShipHalfSize[0] <= pickupPosition[0])) {
+
+                p->playerEffect(playerShip);
+                pickups.erase(pickups.begin() + i);
+
+                if (!playerShip->isAlive()) {
+                    gameOver = true;
+                }
+
+                break;
+            }
+
+            if (pickupPosition[1] > worldBorders[3] || // bullet min y > world max y
+                pickupPosition[1] < worldBorders[2] || // bullet max y < world min y
+                pickupPosition[0] > worldBorders[1] || // bullet min x > world max x
+                pickupPosition[0] < worldBorders[0]) {
+                pickups.erase(pickups.begin() + i);
+                std::cout << "Pickup removed because collided with border" << std::endl;
+            }
+        }
+
         // Enemies collisions
         for (Enemy* e : enemies) {
             enemyPosition = e->getPosition();
@@ -235,6 +277,11 @@ GLvoid idle(GLvoid) {
         // Bullets movements
         for (Bullet* b : bullets) {
             b->move();
+        }
+
+        // Pickups movements
+        for (Pickup* p : pickups) {
+            p->move();
         }
 
 

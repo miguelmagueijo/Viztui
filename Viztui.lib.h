@@ -24,7 +24,7 @@ extern GLfloat enemyHalfSize[2];
 extern GLfloat bulletSize[2];
 extern GLfloat bulletHalfSize[2];
 
-enum MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
+enum class MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
 
 
 #endif //VIZTUI_VIZTUI_LIB_H

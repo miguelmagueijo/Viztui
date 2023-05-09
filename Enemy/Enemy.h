@@ -6,12 +6,14 @@
 #define VIZTUI_ENEMY_H
 
 #include "../Viztui.lib.h"
+#include "../Pickup/Pickup.h"
 
 class Enemy {
 protected:
     GLfloat position[2] {0.0f, 0.0f }; // initializes position in 0, 0
     GLfloat speed;
     GLfloat hp;
+    Pickup* pickup;
 
 public:
     static constexpr GLfloat size[2] { 20,  10};
@@ -19,10 +21,13 @@ public:
     Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
     ~Enemy() = default;
 
+    GLvoid setPickup(Pickup* p);
+    virtual Pickup* getPickup();
     GLfloat* getPosition();
     GLvoid takeDamage(GLfloat dmg);
     GLboolean isAlive();
     GLvoid move(MOVE_DIRS dir);
+
 
     virtual GLvoid draw() = 0;
 };

@@ -7,6 +7,7 @@
 
 #include "../Viztui.lib.h"
 #include "Enemy.h"
+#include "../Pickup/PickupEnemyMine.h"
 
 class MineTransporter : public Enemy {
 private:
@@ -20,6 +21,7 @@ public:
     ~MineTransporter() = default;
 
     GLvoid draw() override;
+    Pickup* getPickup() override;
 };
 
 

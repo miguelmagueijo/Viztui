@@ -1,40 +1,27 @@
 //
-// Created by Miguel Magueijo on 07/05/2023.
+// Created by Miguel Magueijo on 09/05/2023.
 //
 
-#include "Enemy.h"
+#include "Pickup.h"
 
-
-
-Enemy::Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) {
+Pickup::Pickup(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) {
     this->position[0] = x;
     this->position[1] = y;
+    this->dir = dir;
     this->speed = speed;
-    this->hp = hp;
 }
 
-GLvoid Enemy::setPickup(Pickup *p) {
-    this->pickup = p;
+GLvoid Pickup::setPosition(GLfloat x, GLfloat y) {
+    this->position[0] = x;
+    this->position[1] = y;
 }
 
-Pickup* Enemy::getPickup() {
-    return this->pickup->clone();
-}
-
-GLfloat* Enemy::getPosition() {
+GLfloat* Pickup::getPosition() {
     return this->position;
 }
 
-GLvoid Enemy::takeDamage(GLfloat dmg) {
-    this->hp -= dmg;
-}
-
-GLboolean Enemy::isAlive() {
-    return this->hp > 0;
-}
-
-GLvoid Enemy::move(MOVE_DIRS dir) {
-    switch(dir) {
+GLvoid Pickup::move() {
+    switch(this->dir) {
         case MOVE_DIRS::UP:
             this->position[1] += this->speed;
             break;
@@ -49,5 +36,3 @@ GLvoid Enemy::move(MOVE_DIRS dir) {
             break;
     }
 }
-
-
