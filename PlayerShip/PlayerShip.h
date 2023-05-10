@@ -38,10 +38,10 @@ public:
 
     GLvoid draw(GLvoid);
     GLboolean move(MOVE_DIRS dir);
-    GLvoid receiveHp(GLint hp);
-    GLvoid takeDamage(GLint dmg);
+    GLvoid receiveHp(GLshort hp);
+    GLvoid takeDamage(GLshort dmg);
     GLboolean isAlive();
-    GLvoid rotate(GLboolean isCW);
+    GLvoid rotate(MOVE_DIRS rDir);
     PlayerBullet* fireBullet();
 };
 

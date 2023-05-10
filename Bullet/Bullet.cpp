@@ -8,7 +8,7 @@ Bullet::Bullet(GLfloat x, GLfloat y, GLboolean firedByPlayer, MOVE_DIRS dir) {
     this->position[0] = x;
     this->position[1] = y;
     this->firedByPlayer = firedByPlayer;
-    this->dir = dir;
+    setDirection(dir); // also sets angle
 };
 
 Bullet::Bullet() {}
@@ -32,6 +32,21 @@ GLvoid Bullet::setDamage(GLfloat d) {
 
 GLvoid Bullet::setDirection(MOVE_DIRS d) {
     this->dir = d;
+
+    switch (this->dir) {
+        case MOVE_DIRS::UP:
+            this->angle = 0;
+            break;
+        case MOVE_DIRS::DOWN:
+            this->angle = 180;
+            break;
+        case MOVE_DIRS::LEFT:
+            this->angle = 90;
+            break;
+        case MOVE_DIRS::RIGHT:
+            this->angle = -90;
+            break;
+    }
 }
 
 GLfloat* Bullet::getPosition() {

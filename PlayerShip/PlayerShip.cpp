@@ -15,6 +15,7 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->speed = speed;
     this->hp = hp;
     this->bullet = new PlayerBullet(0, 0, MOVE_DIRS::UP, 2, 5);
+    this->currentAngle = 0;
 }
 
 GLfloat* PlayerShip::getPosition() {
@@ -85,12 +86,14 @@ GLvoid PlayerShip::draw(GLvoid) {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    //glTranslatef(-this->position[0], -this->position[1], 0);
-    //glRotatef(this->currentAngle, 0, 0, 1);
-    //glTranslatef(this->position[0], this->position[1], 0);
-
-    // Translation for body component / center of ship
+    // Translation to center ship in position
     glTranslatef(this->position[0] - playerShipHalfSize[0], this->position[1] - playerShipHalfSize[1], 0);
+
+    // Rotation
+    glTranslatef(playerShipHalfSize[0], playerShipHalfSize[1], 0);
+    glRotatef(this->currentAngle, 0, 0, 1);
+    glTranslatef(-playerShipHalfSize[0], -playerShipHalfSize[1], 0);
+
     glPushMatrix();
 
     // Draw left wing
@@ -170,14 +173,14 @@ GLboolean PlayerShip::move(MOVE_DIRS dir) {
     return hasMoved;
 }
 
-GLvoid PlayerShip::receiveHp(GLint hp) {
+GLvoid PlayerShip::receiveHp(GLshort hp) {
     this->hp += hp;
 
     if (this->hp > PlayerShip::maxHp)
         this->hp = PlayerShip::maxHp;
 }
 
-GLvoid PlayerShip::takeDamage(GLint dmg) {
+GLvoid PlayerShip::takeDamage(GLshort dmg) {
     this->hp -= dmg;
 }
 
@@ -185,23 +188,47 @@ GLboolean PlayerShip::isAlive() {
     return this->hp > 0;
 }
 
-GLvoid PlayerShip::rotate(GLboolean isCW) {
-    if (isCW)
-        this->currentAngle += 90;
-    else
-        this->currentAngle -= 90;
+GLvoid PlayerShip::rotate(MOVE_DIRS rDir) {
+    switch (rDir) {
+        case MOVE_DIRS::RIGHT:
+            this->currentAngle -= 90;
+            break;
+        case MOVE_DIRS::LEFT:
+            this->currentAngle += 90;
+            break;
+        default:
+            return;
+    }
 
     if (abs(this->currentAngle) >= 360) {
         this->currentAngle = 0;
     }
-
-    std::cout << this->currentAngle << std::endl;
 }
 
 PlayerBullet* PlayerShip::fireBullet() {
     PlayerBullet* newBullet = this->bullet->clone();
 
-    newBullet->setPosition(this->position[0], this->position[1] + playerShipHalfSize[1] + 2);
+    switch (this->currentAngle) {
+        case 0:
+            newBullet->setPosition(this->position[0], this->position[1] + playerShipHalfSize[1] + 2);
+            newBullet->setDirection(MOVE_DIRS::UP);
+            break;
+        case -90:
+        case 270:
+            newBullet->setPosition(this->position[0] + playerShipHalfSize[0] + 2, this->position[1]);
+            newBullet->setDirection(MOVE_DIRS::RIGHT);
+            break;
+        case -180:
+        case 180:
+            newBullet->setPosition(this->position[0], this->position[1] - playerShipHalfSize[1] - 2);
+            newBullet->setDirection(MOVE_DIRS::DOWN);
+            break;
+        case -270:
+        case 90:
+            newBullet->setPosition(this->position[0] - playerShipHalfSize[1] - 2, this->position[1]);
+            newBullet->setDirection(MOVE_DIRS::LEFT);
+            break;
+    }
 
     return newBullet;
 }

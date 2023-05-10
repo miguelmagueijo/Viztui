@@ -37,6 +37,11 @@ GLvoid PlayerBullet::draw() {
     glPushMatrix();
 
     glTranslatef(this->position[0] - 1.0f, this->position[1] - 2.5f, 0.0f);
+
+    glTranslatef(bulletHalfSize[0], bulletHalfSize[1], 0);
+    glRotatef(this->angle, 0, 0, 1);
+    glTranslatef(-bulletHalfSize[0], -bulletHalfSize[1], 0);
+
     this->body();
 
     glPushMatrix();

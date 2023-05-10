@@ -12,6 +12,7 @@ protected:
     GLfloat position[2] {0, 0};
     GLboolean firedByPlayer; // if true cannot damage player, if false can damage player
     MOVE_DIRS dir;
+    GLfloat angle = 0;
     GLfloat speed = 0;
     GLfloat damage = 0;
 public:

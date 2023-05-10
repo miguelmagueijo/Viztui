@@ -9,7 +9,7 @@
 #include "ElementsUI/HpHeart.h"
 #include "Enemy/MineTransporter.h"
 #include <cstdlib>
-#include <time.h>
+#include <ctime>
 
 
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
@@ -343,12 +343,12 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             break;
         case 'Q':
         case 'q':
-            playerShip->rotate(true);
+            playerShip->rotate(MOVE_DIRS::LEFT);
             needsDraw = true;
             break;
         case 'E':
         case 'e':
-            playerShip->rotate(false);
+            playerShip->rotate(MOVE_DIRS::RIGHT);
             needsDraw = true;
             break;
         case ' ':
@@ -356,6 +356,7 @@ GLvoid keyboard(unsigned char key, int x, int y) {
                 bullets.push_back(playerShip->fireBullet());
                 playerCanFire = false;
                 glutTimerFunc(350, playerFireTimer, 0);
+                needsDraw = true;
             }
 
     }
@@ -371,7 +372,7 @@ GLvoid gameTimer(GLint value) {
 
 
 int main(int argc, char** argv) {
-    srand(time(NULL));
+    srand(time(nullptr));
 
     GLfloat initialHeartsPosition[2] = {
                                         worldBorders[0] + HpHeart::hpHeartSize[0] + 2,
