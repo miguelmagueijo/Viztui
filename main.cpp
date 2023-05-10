@@ -8,6 +8,7 @@
 #include "Menu/MainMenu.h"
 #include "ElementsUI/HpHeart.h"
 #include "Enemy/MineTransporter.h"
+#include "Pickup/PickupMoreHp.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -172,7 +173,8 @@ GLvoid idle(GLvoid) {
                         if (!e->isAlive()) {
                             Pickup* p = e->getPickup();
                             if (p != nullptr) {
-                                pickups.push_back(p);
+                                //pickups.push_back(p);
+                                pickups.push_back(new PickupMoreHp(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
                             }
 
                             enemies.erase(enemies.begin() + j);
@@ -358,6 +360,10 @@ GLvoid keyboard(unsigned char key, int x, int y) {
                 glutTimerFunc(350, playerFireTimer, 0);
                 needsDraw = true;
             }
+            break;
+        case 'p':
+            gameOver = true;
+            break;
 
     }
 }
