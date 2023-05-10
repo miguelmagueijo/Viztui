@@ -9,6 +9,7 @@
 #include "ElementsUI/HpHeart.h"
 #include "Enemy/MineTransporter.h"
 #include "Pickup/PickupMoreHp.h"
+#include "Pickup/PickupMoreDamage.h"
 #include <cstdlib>
 #include <ctime>
 
@@ -73,7 +74,7 @@ GLvoid createEnemies(GLfloat startX, GLfloat startY) {
                             worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j,
                             worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i,
                             2,
-                            5
+                            10
                     )
             );
 
@@ -157,7 +158,7 @@ GLvoid idle(GLvoid) {
             Bullet* b = bullets.at(i);
             bulletPosition = b->getPosition();
 
-            if (b->isFiredByPlayer()) {
+            if (!b->damagesPlayer()) {
                 GLboolean hasCollided = false;
                 for (GLint j = 0; j < enemies.size(); j++) {
                     enemyPosition = enemies.at(j)->getPosition();
@@ -174,7 +175,8 @@ GLvoid idle(GLvoid) {
                             Pickup* p = e->getPickup();
                             if (p != nullptr) {
                                 //pickups.push_back(p);
-                                pickups.push_back(new PickupMoreHp(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
+                                //pickups.push_back(new PickupMoreHp(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
+                                pickups.push_back(new PickupMoreDamage(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
                             }
 
                             enemies.erase(enemies.begin() + j);
@@ -196,7 +198,7 @@ GLvoid idle(GLvoid) {
                         playerShipPosition[1] + playerShipHalfSize[1] <= bulletPosition[1] - bulletSize[1] / 2 || // inimigo max y < bullet min y
                         playerShipPosition[0] + playerShipHalfSize[0] <= bulletPosition[0] - bulletSize[0] / 2)) {
 
-                    playerShip->takeDamage(static_cast<GLint>(b->getDamage()));
+                    playerShip->takeDamage(static_cast<GLshort>(b->getDamage()));
                     bullets.erase(bullets.begin() + i);
 
                     if (!playerShip->isAlive())
@@ -306,7 +308,11 @@ GLvoid idle(GLvoid) {
 
             enemyPosition = enemies.at(enemyIndex)->getPosition();
 
-            bullets.push_back(new EnemyBullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN, 2, 1));
+            Bullet* b = new EnemyBullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN);
+            b->setDamage(1);
+            b->setSpeed(2);
+
+            bullets.push_back(b);
 
             glutTimerFunc(2000, enemyFireTimer, 0);
         }

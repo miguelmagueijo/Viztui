@@ -4,14 +4,15 @@
 
 #include "Bullet.h"
 
-Bullet::Bullet(GLfloat x, GLfloat y, GLboolean firedByPlayer, MOVE_DIRS dir) {
+Bullet::Bullet(GLfloat x, GLfloat y, MOVE_DIRS dir) {
     this->position[0] = x;
     this->position[1] = y;
-    this->firedByPlayer = firedByPlayer;
-    setDirection(dir); // also sets angle
-};
+    this->speed = 1;
+    this->damage = 1;
+    this->setDirection(dir); // also sets angle
+}
 
-Bullet::Bullet() {}
+Bullet::Bullet() : Bullet(0, 0, MOVE_DIRS::UP) {}
 
 GLvoid Bullet::setPosition(GLfloat x, GLfloat y) {
     this->position[0] = x;
@@ -57,8 +58,8 @@ GLfloat Bullet::getDamage() {
     return this->damage;
 }
 
-GLboolean Bullet::isFiredByPlayer() {
-    return this->firedByPlayer;
+GLboolean Bullet::damagesPlayer()  {
+    return false;
 }
 
 GLvoid Bullet::move() {

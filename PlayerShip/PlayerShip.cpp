@@ -14,7 +14,10 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->position[1] = y;
     this->speed = speed;
     this->hp = hp;
-    this->bullet = new PlayerBullet(0, 0, MOVE_DIRS::UP, 2, 5);
+    this->bulletDmg = 5;
+    this->bullet = new PlayerBullet();
+    this->bullet->setSpeed(2);
+    this->bullet->setDamage(5);
     this->currentAngle = 0;
 }
 
@@ -180,7 +183,15 @@ GLvoid PlayerShip::receiveHp(GLshort hp) {
         this->hp = PlayerShip::maxHp;
 }
 
+GLvoid PlayerShip::increaseBulletDmg(GLfloat dmg) {
+    if (dmg < 0) throw std::invalid_argument("Bullet damage increase needs to be >=0");
+
+    this->bullet->setDamage(this->bullet->getDamage() + dmg);
+}
+
 GLvoid PlayerShip::takeDamage(GLshort dmg) {
+    if (dmg < 0) throw std::invalid_argument("Player can only take damage >= 0");
+
     this->hp -= dmg;
 }
 

@@ -10,13 +10,12 @@
 class Bullet {
 protected:
     GLfloat position[2] {0, 0};
-    GLboolean firedByPlayer; // if true cannot damage player, if false can damage player
     MOVE_DIRS dir;
-    GLfloat angle = 0;
-    GLfloat speed = 0;
-    GLfloat damage = 0;
+    GLfloat angle;
+    GLfloat speed;
+    GLfloat damage;
 public:
-    Bullet(GLfloat x, GLfloat y, GLboolean firedByPlayer, MOVE_DIRS dir);
+    Bullet(GLfloat x, GLfloat y, MOVE_DIRS dir);
     Bullet();
     ~Bullet() = default;
 
@@ -26,8 +25,7 @@ public:
     GLvoid setDirection(MOVE_DIRS d);
     GLfloat* getPosition();
     GLfloat getDamage();
-    GLboolean isFiredByPlayer();
-
+    virtual GLboolean damagesPlayer();
     GLvoid move();
 
     virtual GLvoid draw() = 0;

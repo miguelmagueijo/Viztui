@@ -20,6 +20,7 @@ private:
     GLfloat position[2]; // X and Y coords
     GLfloat speed;
     GLshort hp;
+    GLfloat bulletDmg;
 
 
     GLvoid body(GLvoid);
@@ -39,6 +40,7 @@ public:
     GLvoid draw(GLvoid);
     GLboolean move(MOVE_DIRS dir);
     GLvoid receiveHp(GLshort hp);
+    GLvoid increaseBulletDmg(GLfloat dmg);
     GLvoid takeDamage(GLshort dmg);
     GLboolean isAlive();
     GLvoid rotate(MOVE_DIRS rDir);

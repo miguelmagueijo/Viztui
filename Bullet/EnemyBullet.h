@@ -13,9 +13,11 @@ private:
     GLvoid body();
     GLvoid head();
 public:
-    EnemyBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg);
+    EnemyBullet(GLfloat x, GLfloat y, MOVE_DIRS dir);
+    EnemyBullet();
     ~EnemyBullet() = default;
 
+    GLboolean damagesPlayer() override;
     GLvoid draw() override;
     EnemyBullet* clone() override;
 };

@@ -13,9 +13,11 @@ private:
     GLvoid body();
     GLvoid head();
 public:
-    PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg);
+    PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir);
+    PlayerBullet();
     ~PlayerBullet() = default;
 
+    GLboolean damagesPlayer() override;
     GLvoid draw() override;
     PlayerBullet* clone() override;
 };

@@ -4,10 +4,12 @@
 
 #include "EnemyBullet.h"
 
-EnemyBullet::EnemyBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg)
-        : Bullet(x, y, false, dir) {
-    this->setDamage(dmg);
-    this->setSpeed(speed);
+EnemyBullet::EnemyBullet(GLfloat x, GLfloat y, MOVE_DIRS dir) : Bullet(x, y, dir) {}
+
+EnemyBullet::EnemyBullet() : Bullet() {}
+
+GLboolean EnemyBullet::damagesPlayer() {
+    return true;
 }
 
 GLvoid EnemyBullet::body() {

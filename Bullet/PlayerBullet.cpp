@@ -4,10 +4,12 @@
 
 #include "PlayerBullet.h"
 
-PlayerBullet::PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed, GLfloat dmg)
-                            : Bullet(x, y, true, dir) {
-    this->setDamage(dmg);
-    this->setSpeed(speed);
+PlayerBullet::PlayerBullet(GLfloat x, GLfloat y, MOVE_DIRS dir) : Bullet(x, y, dir) {}
+
+PlayerBullet::PlayerBullet() : Bullet() {}
+
+GLboolean PlayerBullet::damagesPlayer() {
+    return false;
 }
 
 GLvoid PlayerBullet::body() {
