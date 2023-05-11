@@ -18,7 +18,12 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->bullet = new PlayerBullet();
     this->bullet->setSpeed(2);
     this->bullet->setDamage(5);
+    this->canFireExtra = false;
     this->currentAngle = 0;
+}
+
+GLvoid PlayerShip::setFireExtra(GLboolean fExtra) {
+    this->canFireExtra = fExtra;
 }
 
 GLfloat* PlayerShip::getPosition() {
@@ -216,7 +221,9 @@ GLvoid PlayerShip::rotate(MOVE_DIRS rDir) {
     }
 }
 
-PlayerBullet* PlayerShip::fireBullet() {
+std::vector<PlayerBullet*> PlayerShip::fireBullet() {
+    std::vector<PlayerBullet*> bullets;
+
     PlayerBullet* newBullet = this->bullet->clone();
 
     switch (this->currentAngle) {
@@ -241,5 +248,47 @@ PlayerBullet* PlayerShip::fireBullet() {
             break;
     }
 
-    return newBullet;
+    bullets.push_back(newBullet);
+
+    if (this->canFireExtra) {
+        PlayerBullet* leftBullet = this->bullet->clone();
+        PlayerBullet* rightBullet = this->bullet->clone();
+
+        leftBullet->setDamage(this->bulletDmg / 2);
+        rightBullet->setDamage(this->bulletDmg / 2);
+
+        switch (this->currentAngle) {
+            case 0:
+                leftBullet->setPosition(this->position[0] - playerShipSize[0] * 9 / 40, this->position[1] + playerShipSize[1] * 2 / 15);
+                rightBullet->setPosition(this->position[0] + playerShipSize[0] * 9 / 40, this->position[1] + playerShipSize[1] * 2 / 15);
+                leftBullet->setDirection(MOVE_DIRS::UP);
+                rightBullet->setDirection(MOVE_DIRS::UP);
+                break;
+            case -90:
+            case 270:
+                leftBullet->setPosition(this->position[0] + playerShipSize[1] * 2 / 15, this->position[1] + playerShipSize[0] * 9 / 40);
+                rightBullet->setPosition(this->position[0] + playerShipSize[1] * 2 / 15, this->position[1] - playerShipSize[0] * 9 / 40);
+                leftBullet->setDirection(MOVE_DIRS::RIGHT);
+                rightBullet->setDirection(MOVE_DIRS::RIGHT);
+                break;
+            case -180:
+            case 180:
+                leftBullet->setPosition(this->position[0] + playerShipSize[0] * 9 / 40, this->position[1] - playerShipSize[1] * 2 / 15);
+                rightBullet->setPosition(this->position[0] - playerShipSize[0] * 9 / 40, this->position[1] - playerShipSize[1] * 2 / 15);
+                leftBullet->setDirection(MOVE_DIRS::DOWN);
+                rightBullet->setDirection(MOVE_DIRS::DOWN);
+                break;
+            case -270:
+            case 90:
+                leftBullet->setPosition(this->position[0] - playerShipSize[1] * 2 / 15, this->position[1] - playerShipSize[0] * 9 / 40);
+                rightBullet->setPosition(this->position[0] - playerShipSize[1] * 2 / 15, this->position[1] + playerShipSize[0] * 9 / 40);
+                leftBullet->setDirection(MOVE_DIRS::LEFT);
+                rightBullet->setDirection(MOVE_DIRS::LEFT);
+                break;
+        }
+
+        bullets.insert(bullets.end(), {leftBullet, rightBullet});
+    }
+
+    return bullets;
 }

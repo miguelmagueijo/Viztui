@@ -21,6 +21,7 @@ private:
     GLfloat speed;
     GLshort hp;
     GLfloat bulletDmg;
+    GLboolean canFireExtra;
 
 
     GLvoid body(GLvoid);
@@ -33,6 +34,7 @@ public:
     PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp);
     ~PlayerShip() = default;
 
+    GLvoid setFireExtra(GLboolean fExtra);
     GLfloat* getPosition(GLvoid);
     GLshort getHp();
     static GLshort getMaxHp();
@@ -44,7 +46,7 @@ public:
     GLvoid takeDamage(GLshort dmg);
     GLboolean isAlive();
     GLvoid rotate(MOVE_DIRS rDir);
-    PlayerBullet* fireBullet();
+    std::vector<PlayerBullet*> fireBullet();
 };
 
 

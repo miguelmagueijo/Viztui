@@ -10,14 +10,19 @@
 #include "Enemy/MineTransporter.h"
 #include "Pickup/PickupMoreHp.h"
 #include "Pickup/PickupMoreDamage.h"
+#include "Pickup/PickupTwoBullets.h"
 #include <cstdlib>
 #include <ctime>
+#include <sstream>
 
 
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
 
 // World Borders by order Left, Right, Bottom, Up
 GLfloat worldBorders[4] = { -125, 125, -125, 125 };
+// Window size, W, H
+const GLint initialWindowSize[2] = { 850, 850 };
+const GLfloat aspectRatio = initialWindowSize[0] / initialWindowSize[1];
 
 // Sizes
 GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
@@ -176,7 +181,8 @@ GLvoid idle(GLvoid) {
                             if (p != nullptr) {
                                 //pickups.push_back(p);
                                 //pickups.push_back(new PickupMoreHp(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
-                                pickups.push_back(new PickupMoreDamage(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
+                                //pickups.push_back(new PickupMoreDamage(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
+                                pickups.push_back(new PickupTwoBullets(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
                             }
 
                             enemies.erase(enemies.begin() + j);
@@ -361,7 +367,8 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             break;
         case ' ':
             if (playerCanFire) {
-                bullets.push_back(playerShip->fireBullet());
+                std::vector<PlayerBullet*> playerBullets = playerShip->fireBullet();
+                bullets.insert(bullets.end(), playerBullets.begin(), playerBullets.end());
                 playerCanFire = false;
                 glutTimerFunc(350, playerFireTimer, 0);
                 needsDraw = true;
@@ -380,8 +387,6 @@ GLvoid gameTimer(GLint value) {
     if (!gameOver)
         glutTimerFunc(16, gameTimer, 0);
 }
-
-
 
 int main(int argc, char** argv) {
     srand(time(nullptr));
@@ -405,7 +410,7 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(20, 20);
 
     // Set window size
-    glutInitWindowSize(850, 850);
+    glutInitWindowSize(initialWindowSize[0], initialWindowSize[1]);
 
     // Create window and set title
     glutCreateWindow("Viztui - The Space War");
