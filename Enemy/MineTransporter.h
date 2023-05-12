@@ -21,7 +21,6 @@ public:
     ~MineTransporter() = default;
 
     GLvoid draw() override;
-    Pickup* getPickup() override;
 };
 
 

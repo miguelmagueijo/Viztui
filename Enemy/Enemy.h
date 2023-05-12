@@ -13,6 +13,7 @@ protected:
     GLfloat position[2] {0.0f, 0.0f }; // initializes position in 0, 0
     GLfloat speed;
     GLfloat hp;
+    GLboolean hasPickup;
     Pickup* pickup;
 
 public:
@@ -21,8 +22,9 @@ public:
     Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
     ~Enemy() = default;
 
+    GLboolean dropsPickup();
     GLvoid setPickup(Pickup* p);
-    virtual Pickup* getPickup();
+    Pickup* getPickup();
     GLfloat* getPosition();
     GLvoid takeDamage(GLfloat dmg);
     GLboolean isAlive();

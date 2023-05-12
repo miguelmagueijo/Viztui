@@ -20,6 +20,7 @@ private:
     GLvoid bulletHead();
 public:
     PickupMoreDamage(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
+    PickupMoreDamage(MOVE_DIRS dir, GLfloat speed);
     ~PickupMoreDamage() = default;
 
     GLvoid setDamageGain(GLshort h);

@@ -11,6 +11,8 @@ PickupMoreDamage::PickupMoreDamage(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat 
     this->dmgGain = 5;
 }
 
+PickupMoreDamage::PickupMoreDamage(MOVE_DIRS dir, GLfloat speed) : PickupMoreDamage(0, 0, dir, speed) {}
+
 GLvoid PickupMoreDamage::triangle() {
     glColor3f(0.78f, 0.61f, 0.19f);
 

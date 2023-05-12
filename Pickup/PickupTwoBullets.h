@@ -17,6 +17,7 @@ private:
     GLvoid bulletHead();
 public:
     PickupTwoBullets(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
+    PickupTwoBullets(MOVE_DIRS dir, GLfloat speed);
     ~PickupTwoBullets() = default;
 
     GLvoid draw() override;

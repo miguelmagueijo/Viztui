@@ -9,6 +9,8 @@ GLfloat PickupTwoBullets::halfSize[2] = { PickupTwoBullets::size[0] / 2, PickupT
 
 PickupTwoBullets::PickupTwoBullets(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) : Pickup(x, y, dir, speed) {}
 
+PickupTwoBullets::PickupTwoBullets(MOVE_DIRS dir, GLfloat speed) : PickupTwoBullets(0, 0, dir, speed) {}
+
 GLvoid PickupTwoBullets::bulletBody() {
     glColor3f(0.42f, 0.50f, 0.39f);
 

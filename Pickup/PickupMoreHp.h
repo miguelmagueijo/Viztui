@@ -22,6 +22,7 @@ private:
     GLvoid rectHorizontal();
 public:
     PickupMoreHp(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
+    PickupMoreHp(MOVE_DIRS dir, GLfloat speed);
     ~PickupMoreHp() = default;
 
     GLvoid setHpGain(GLshort h);

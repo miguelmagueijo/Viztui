@@ -11,6 +11,8 @@ PickupMoreHp::PickupMoreHp(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) :
     this->hpGain = 1;
 }
 
+PickupMoreHp::PickupMoreHp(MOVE_DIRS dir, GLfloat speed) : PickupMoreHp(0, 0, dir, speed) {}
+
 GLvoid PickupMoreHp::setHpGain(GLshort h) {
     if (h < 0) throw std::invalid_argument("Bad hp gain value, must be >=0");
 

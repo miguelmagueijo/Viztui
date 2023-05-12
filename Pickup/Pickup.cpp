@@ -11,6 +11,8 @@ Pickup::Pickup(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) {
     this->speed = speed;
 }
 
+Pickup::Pickup(MOVE_DIRS dir, GLfloat speed) : Pickup(0, 0, dir, speed) {}
+
 GLvoid Pickup::setPosition(GLfloat x, GLfloat y) {
     this->position[0] = x;
     this->position[1] = y;

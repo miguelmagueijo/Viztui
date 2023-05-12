@@ -14,7 +14,8 @@ protected:
     MOVE_DIRS dir;
     GLfloat speed;
 public:
-    Pickup(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
+    Pickup(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);\
+    Pickup(MOVE_DIRS dir, GLfloat speed);
     ~Pickup() = default;
 
     GLvoid setPosition(GLfloat x, GLfloat y);

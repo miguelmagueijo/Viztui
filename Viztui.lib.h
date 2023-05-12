@@ -1,6 +1,7 @@
 //
 // Created by migue on 30/04/2023.
 //
+#pragma once
 
 #ifndef VIZTUI_VIZTUI_LIB_H
 #define VIZTUI_VIZTUI_LIB_H
@@ -18,6 +19,8 @@
     #include <GLUT/glut.h>
 #endif
 
+extern GLint windowSize[2];
+extern GLfloat halfWindowSize[2];
 extern GLfloat worldBorders[4];
 extern GLfloat enemySize[2];
 extern GLfloat enemyHalfSize[2];
@@ -25,6 +28,6 @@ extern GLfloat bulletSize[2];
 extern GLfloat bulletHalfSize[2];
 
 enum class MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
-
+enum class GAME_STATE { PLAYING, PAUSED, OVER };
 
 #endif //VIZTUI_VIZTUI_LIB_H

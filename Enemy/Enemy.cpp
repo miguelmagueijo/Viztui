@@ -4,21 +4,29 @@
 
 #include "Enemy.h"
 
-
-
 Enemy::Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) {
     this->position[0] = x;
     this->position[1] = y;
     this->speed = speed;
     this->hp = hp;
+    this->hasPickup = false;
 }
 
 GLvoid Enemy::setPickup(Pickup *p) {
     this->pickup = p;
+    this->hasPickup = true;
+}
+
+GLboolean Enemy::dropsPickup() {
+    return this->hasPickup;
 }
 
 Pickup* Enemy::getPickup() {
-    return this->pickup->clone();
+    Pickup* newPickup = this->pickup->clone();
+
+    newPickup->setPosition(this->position[0], this->position[1]);
+
+    return newPickup;
 }
 
 GLfloat* Enemy::getPosition() {

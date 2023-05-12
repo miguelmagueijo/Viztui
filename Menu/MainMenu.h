@@ -6,13 +6,11 @@
 #define VIZTUI_MAINMENU_H
 
 #include "../Viztui.lib.h"
+#include <sstream>
 
 class MainMenu {
 public:
-    MainMenu();
-    ~MainMenu() = default;
-
-    static GLvoid draw(GLvoid);
+    static GLvoid draw();
     static GLvoid idle();
     static GLvoid keyboard(unsigned char key, int x, int y);
 };

@@ -8,14 +8,6 @@ MineTransporter::MineTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp
     this->setPickup(new PickupEnemyMine(0, 0, MOVE_DIRS::DOWN, 2));
 }
 
-Pickup* MineTransporter::getPickup() {
-    Pickup* newPickup = Enemy::getPickup();
-
-    newPickup->setPosition(this->position[0], this->position[1]);
-
-    return newPickup;
-}
-
 GLvoid MineTransporter::body() {
     glColor3f(0.87f, 0.44f, 0.44f);
 

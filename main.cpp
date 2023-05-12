@@ -14,15 +14,16 @@
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
+#include <set>
 
 
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
 
+// Window size [Width, Height]
+GLint windowSize[2] = { 850, 850 };
+GLfloat halfWindowSize[2] = { static_cast<GLfloat>(windowSize[0] / 2), static_cast<GLfloat>(windowSize[1] / 2) };
 // World Borders by order Left, Right, Bottom, Up
 GLfloat worldBorders[4] = { -125, 125, -125, 125 };
-// Window size, W, H
-const GLint initialWindowSize[2] = { 850, 850 };
-const GLfloat aspectRatio = initialWindowSize[0] / initialWindowSize[1];
 
 // Sizes
 GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
@@ -30,7 +31,23 @@ GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
 GLfloat bulletSize[2] = { 2, 5};
 GLfloat bulletHalfSize[2] = { bulletSize[0] / 2, bulletSize[1] / 2 };
 
-GLboolean gameOver = false;
+struct gamelevel {
+    GLint occupiedPercentageX;
+    GLint enemyBorderHitMax;
+    GLfloat enemySpeed;
+    GLfloat pickupSpeed;
+    GLfloat enemySpeedIncremental; // increments speed for each moves down
+    GLint numWaves; // also the size of the next 3 vectors
+    std::vector<std::vector<GLint>> enemyTypePerLine; // 0 -> Basic, 1 -> Fire, 2 -> Miner
+    std::vector<std::vector<GLfloat>> enemyHpPerWave; // hp of 0 -> basic, 1 -> fire, 2 -> miner
+    std::vector<std::vector<GLint>> pickupsPerWave; // idx corresponds to 0 -> MoreHp, 1 -> TwoBullets, 3 -> MoreDamage
+    struct gamelevel* nextLevel;
+} gamelevel;
+
+struct gamelevel* currentLevel;
+GLboolean gameOver = false; // to be removed
+GAME_STATE gameState = GAME_STATE::PLAYING;
+GLint currWaveNum = 0;
 GLboolean frameTimerUp = false;
 GLboolean needsDraw = false;
 GLboolean areEnemiesMovingLeft = false;
@@ -56,6 +73,41 @@ std::vector<Enemy*> enemies;
 std::vector<Bullet*> bullets;
 std::vector<Pickup*> pickups;
 
+std::set<GLint> idxEnemiesThatFire;
+
+struct gamelevel* level1 = new struct gamelevel;
+struct gamelevel* level2 = new struct gamelevel;
+//struct level* level3 = new struct level;
+
+GLvoid setupLevels() {
+    // Level 1
+    level1->enemyBorderHitMax = 3;
+    level1->enemySpeed = 2;
+    level1->pickupSpeed = 1.5f;
+    level1->enemySpeedIncremental = 0.1f;
+    level1->occupiedPercentageX = 70;
+    level1->numWaves = 1;
+    level1->enemyTypePerLine.push_back({ { 0, 0, 0 } });
+    level1->enemyHpPerWave.push_back({ { 20, 0, 0 } });
+    level1->pickupsPerWave.push_back({ { 0, 1, 0 } });
+    level1->nextLevel = level2;
+
+    // Level 2
+    level2->enemyBorderHitMax = 3;
+    level2->enemySpeed = 2;
+    level1->pickupSpeed = 2;
+    level2->enemySpeedIncremental = 0.1f;
+    level2->occupiedPercentageX = 70;
+    level2->numWaves = 2;
+    level2->enemyTypePerLine = { { 1, 1, 2 }, { 1, 2, 2 } };
+    level2->enemyHpPerWave = { { 20, 30, 0 }, { 20, 30, 0 } };
+    level2->pickupsPerWave = { { 1, 1, 0 }, { 1, 0, 0 } };
+    level2->nextLevel = nullptr;
+
+    // Level 3
+    //level3->nextLevel = nullptr;
+}
+
 GLvoid enemyFireTimer(GLint value) {
     enemyCanFire = true;
 }
@@ -64,25 +116,74 @@ GLvoid playerFireTimer(GLint value) {
     playerCanFire = true;
 }
 
-GLvoid createEnemies(GLfloat startX, GLfloat startY) {
+GLvoid createEnemies() {
     enemies.clear();
-
-    GLint nLines = static_cast<GLint>(abs(worldBorders[3] - worldBorders[2]) * 0.3f / (enemySize[1] * 2));
-    GLint nCols = static_cast<GLint>(abs(worldBorders[1] - worldBorders[0]) / (enemySize[0] * 2));
-    nCols -= nCols / 5 + 1;
+    GLint nLines = currentLevel->enemyTypePerLine.at(currWaveNum).size();
+    GLint nCols = abs(worldBorders[1] - worldBorders[0]) * currentLevel->occupiedPercentageX / 100 / (enemySize[0] * 2);
+    std::vector<GLint> idxEnemiesCanDrop; // enemies indexes that can drop pickups
+    //nCols -= nCols / 5 + 1;
 
     for (GLint i = 0; i < nLines; i++) {
+        GLint enemyType = currentLevel->enemyTypePerLine.at(currWaveNum).at(i);
+
         for (GLint j = 0; j < nCols; j++) {
             // (Ponto inicial ± halfSize) ± ( (size * 2) * col|line)
-            enemies.push_back(
-                    new MineTransporter(
-                            worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j,
-                            worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i,
-                            2,
-                            10
-                    )
-            );
+            GLfloat x = worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j;
+            GLfloat y = worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i;
+            GLint idx = enemies.size();
 
+            switch(enemyType) {
+                case 0:
+                    enemies.push_back( new SoldierTransporter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
+                    idxEnemiesCanDrop.push_back(idx);
+                    break;
+                case 1:
+                    enemies.push_back( new Fighter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
+                    idxEnemiesCanDrop.push_back(idx);
+                    idxEnemiesThatFire.insert(idx);
+                    break;
+                case 2:
+                    enemies.push_back( new MineTransporter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
+                    break;
+                default:
+                    throw std::invalid_argument("Bad enemy type TODO");
+            }
+        }
+    }
+
+    if (!idxEnemiesCanDrop.empty()) {
+        std::vector<GLint> currPickupsWave = currentLevel->pickupsPerWave.at(currWaveNum);
+        for (GLint i = 0; i < currPickupsWave.size(); i++) {
+            GLboolean breakLoop = false;
+            GLint num = currPickupsWave.at(i);
+            Pickup * p;
+
+            switch (i) {
+                case 0:
+                    p = new PickupMoreHp(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    break;
+                case 1:
+                    p = new PickupTwoBullets(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    break;
+                case 2:
+                    p = new PickupMoreDamage(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    break;
+                default:
+                    throw std::invalid_argument("Bad pickup");
+            }
+
+            for (GLint j = 0; j < num; j++) {
+                if (idxEnemiesCanDrop.empty()) {
+                    breakLoop = true;
+                    break;
+                }
+
+                GLint v = rand() % idxEnemiesCanDrop.size();
+                enemies.at(idxEnemiesCanDrop.at(v))->setPickup(p);
+                idxEnemiesCanDrop.erase(idxEnemiesCanDrop.begin() + v);
+            }
+
+            if (breakLoop) break;
         }
     }
 }
@@ -166,23 +267,22 @@ GLvoid idle(GLvoid) {
             if (!b->damagesPlayer()) {
                 GLboolean hasCollided = false;
                 for (GLint j = 0; j < enemies.size(); j++) {
-                    enemyPosition = enemies.at(j)->getPosition();
+                    Enemy* e = enemies.at(j);
+                    enemyPosition = e->getPosition();
 
                     if ( !(enemyPosition[1] - enemySize[1] / 2 >= bulletPosition[1] + bulletHalfSize[1] || // inimigo min y > bullet max y
                            enemyPosition[0] - enemySize[0] / 2 >= bulletPosition[0] + bulletHalfSize[0] || // inimigo min x > bullet max x
                            enemyPosition[1] + enemySize[1] / 2 <= bulletPosition[1] - bulletHalfSize[1] || // inimigo max y < bullet min y
                            enemyPosition[0] + enemySize[0] / 2 <= bulletPosition[0] - bulletHalfSize[0]) ) { // inimigo max x < bullet min x
 
-                        std::cout << "Collision bullet with enemy" << std::endl;
-                        Enemy* e = enemies.at(j);
+                        std::cout << "Collision bullet with enemy" << b->getDamage() << std::endl;
+
+
                         e->takeDamage(b->getDamage());
                         if (!e->isAlive()) {
-                            Pickup* p = e->getPickup();
-                            if (p != nullptr) {
-                                //pickups.push_back(p);
-                                //pickups.push_back(new PickupMoreHp(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
-                                //pickups.push_back(new PickupMoreDamage(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
-                                pickups.push_back(new PickupTwoBullets(enemyPosition[0], enemyPosition[1], MOVE_DIRS::DOWN, 2));
+                            if (e->dropsPickup()) {
+                                std::cout << "here" << std::endl;
+                                pickups.push_back(e->getPickup());
                             }
 
                             enemies.erase(enemies.begin() + j);
@@ -410,20 +510,25 @@ int main(int argc, char** argv) {
     glutInitWindowPosition(20, 20);
 
     // Set window size
-    glutInitWindowSize(initialWindowSize[0], initialWindowSize[1]);
+    glutInitWindowSize(windowSize[0], windowSize[1]);
 
     // Create window and set title
     glutCreateWindow("Viztui - The Space War");
 
-    createEnemies(worldBorders[0] + 5, worldBorders[3] - 5);
+    setupLevels();
+    currentLevel = level1;
+
+    createEnemies();
 
     // Set display callback
     glutDisplayFunc(draw);
 
     // Set keyboard callback
+    //glutKeyboardFunc(MainMenu::keyboard);
     glutKeyboardFunc(keyboard);
 
     // Set idle function
+    //glutIdleFunc(MainMenu::idle);
     glutIdleFunc(idle);
 
     glutTimerFunc(16, gameTimer, 0);
