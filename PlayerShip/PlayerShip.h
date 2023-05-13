@@ -2,6 +2,7 @@
 // Created by migue on 30/04/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_PLAYERSHIP_H
 #define VIZTUI_PLAYERSHIP_H
 

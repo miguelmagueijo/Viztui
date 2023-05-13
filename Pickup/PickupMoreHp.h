@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 10/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_PICKUPMOREHP_H
 #define VIZTUI_PICKUPMOREHP_H
 

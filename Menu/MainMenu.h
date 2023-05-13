@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 08/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_MAINMENU_H
 #define VIZTUI_MAINMENU_H
 

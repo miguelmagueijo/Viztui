@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 04/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_MINETRANSPORTER_H
 #define VIZTUI_MINETRANSPORTER_H
 

@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 07/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_ENEMY_H
 #define VIZTUI_ENEMY_H
 

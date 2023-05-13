@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 09/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_HPHEART_H
 #define VIZTUI_HPHEART_H
 

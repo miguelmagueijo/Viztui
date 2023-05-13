@@ -2,6 +2,7 @@
 // Created by Miguel Magueijo on 11/05/2023.
 //
 
+#pragma once
 #ifndef VIZTUI_PICKUPTWOBULLETS_H
 #define VIZTUI_PICKUPTWOBULLETS_H
 

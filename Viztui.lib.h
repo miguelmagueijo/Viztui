@@ -1,8 +1,8 @@
 //
 // Created by migue on 30/04/2023.
 //
-#pragma once
 
+#pragma once
 #ifndef VIZTUI_VIZTUI_LIB_H
 #define VIZTUI_VIZTUI_LIB_H
 
