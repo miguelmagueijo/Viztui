@@ -4,22 +4,22 @@
 
 #include "PickupMoreDamage.h"
 
-GLfloat PickupMoreDamage::size[2] = { 8, 5 };
-GLfloat PickupMoreDamage::halfSize[2] = { PickupMoreDamage::size[0] / 2, PickupMoreDamage::size[1] / 2 };
-
-PickupMoreDamage::PickupMoreDamage(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) : Pickup(x, y, dir, speed) {
-    this->dmgGain = 5;
+// Gives player bullets more damage
+PickupMoreDamage::PickupMoreDamage(GLfloat dmgGain) : Pickup() {
+    this->setDamageGain(dmgGain);
 }
 
-PickupMoreDamage::PickupMoreDamage(MOVE_DIRS dir, GLfloat speed) : PickupMoreDamage(0, 0, dir, speed) {}
+GLvoid PickupMoreDamage::setDamageGain(GLfloat dg) {
+    if (dg <= 0) throw std::invalid_argument("Pickup (MoreDamage) damage gain must be greater than 0");
+}
 
 GLvoid PickupMoreDamage::triangle() {
     glColor3f(0.78f, 0.61f, 0.19f);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0, 0);
-        glVertex2f(PickupMoreDamage::size[0] * 5 / 16, PickupMoreDamage::size[1]);
-        glVertex2f(PickupMoreDamage::size[0] * 5 / 8, 0);
+        glVertex2f(pickupHalfSize[0] / 2, pickupSize[1] * 5 / 7);
+        glVertex2f(pickupHalfSize[0], 0);
     } glEnd();
 }
 
@@ -28,9 +28,9 @@ GLvoid PickupMoreDamage::bulletBody() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, PickupMoreDamage::size[1] * 3 / 5);
-        glVertex2f(PickupMoreDamage::size[0] / 4, PickupMoreDamage::size[1] * 3 / 5);
-        glVertex2f(PickupMoreDamage::size[0] / 4, 0);
+        glVertex2f(0, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] / 5, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] / 5, 0);
     } glEnd();
 }
 
@@ -39,9 +39,9 @@ GLvoid PickupMoreDamage::bulletHead() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, PickupMoreDamage::size[1] * 2 / 5);
-        glVertex2f(PickupMoreDamage::size[0] / 4, PickupMoreDamage::size[1] * 2 / 5);
-        glVertex2f(PickupMoreDamage::size[0] / 4, 0);
+        glVertex2f(0, pickupSize[1] * 2 / 7);
+        glVertex2f(pickupSize[0] / 5, pickupSize[1] * 2 / 7);
+        glVertex2f(pickupSize[0] / 5, 0);
     } glEnd();
 }
 
@@ -49,20 +49,22 @@ GLvoid PickupMoreDamage::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - PickupMoreDamage::halfSize[0], this->position[1] - PickupMoreDamage::halfSize[1], 0);
+    glTranslatef(this->position[0] - pickupHalfSize[0], this->position[1] - pickupHalfSize[1], 0);
 
-    this->bulletBody();
+    this->background();
 
     glPushMatrix();
 
-    glTranslatef(0, PickupMoreDamage::size[1] * 3 / 5, 0);
-    this->bulletHead();
+    glTranslatef(pickupSize[0] / 10, pickupSize[1] / 7, 0);
+    this->bulletBody();
 
+    glTranslatef(0, pickupSize[1] * 3 / 7, 0);
+    this->bulletHead();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(PickupMoreDamage::size[0] * 3 / 8, 0, 0);
+    glTranslatef(pickupSize[0] * 2 / 5, pickupSize[1] / 7, 0);
     this->triangle();
 
     glPopMatrix();

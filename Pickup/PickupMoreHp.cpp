@@ -4,17 +4,12 @@
 
 #include "PickupMoreHp.h"
 
-GLfloat PickupMoreHp::size[2] = { 8, 5 };
-GLfloat PickupMoreHp::halfSize[2] = { PickupMoreHp::size[0] / 2, PickupMoreHp::size[1] / 2 };
-
-PickupMoreHp::PickupMoreHp(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) : Pickup(x, y, dir, speed) {
-    this->hpGain = 1;
+PickupMoreHp::PickupMoreHp(GLint hpGain) : Pickup() {
+    this->setHpGain(hpGain);
 }
 
-PickupMoreHp::PickupMoreHp(MOVE_DIRS dir, GLfloat speed) : PickupMoreHp(0, 0, dir, speed) {}
-
-GLvoid PickupMoreHp::setHpGain(GLshort h) {
-    if (h < 0) throw std::invalid_argument("Bad hp gain value, must be >=0");
+GLvoid PickupMoreHp::setHpGain(GLint h) {
+    if (h <= 0) throw std::invalid_argument("Pickup (MoreHp) hp gain must be greater than 0");
 
     this->hpGain = h;
 }
@@ -24,8 +19,8 @@ GLvoid PickupMoreHp::leftArcTriangle() {
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0, 0);
-        glVertex2f(0, PickupMoreHp::size[1] * 3 / 5);
-        glVertex2f(PickupMoreHp::halfSize[0], 0);
+        glVertex2f(0, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -34,8 +29,8 @@ GLvoid PickupMoreHp::rightArcTriangle() {
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0, 0);
-        glVertex2f(PickupMoreHp::halfSize[0], PickupMoreHp::size[1] * 3 / 5);
-        glVertex2f(PickupMoreHp::halfSize[0], 0);
+        glVertex2f(pickupSize[0] * 2 / 5, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -43,9 +38,9 @@ GLvoid PickupMoreHp::bottomTriangle() {
     glColor3f(1, 0, 0);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(PickupMoreHp::size[0] / 4, 0);
-        glVertex2f(0, PickupMoreHp::size[1] * 2 / 5);
-        glVertex2f(PickupMoreHp::halfSize[0], PickupMoreHp::size[1] * 2 / 5);
+        glVertex2f(pickupSize[0] / 5, 0);
+        glVertex2f(0, pickupSize[1] * 2 / 7);
+        glVertex2f(pickupSize[0] * 2 / 5, pickupSize[1] * 2 / 7);
     } glEnd();
 }
 
@@ -54,9 +49,9 @@ GLvoid PickupMoreHp::rectVertical() {
 
     glBegin(GL_QUADS); {
         glVertex2f( 0, 0);
-        glVertex2f( 0, PickupMoreHp::size[1] * 3 / 5);
-        glVertex2f( PickupMoreHp::size[0] / 8, PickupMoreHp::size[1] * 3 / 5);
-        glVertex2f( PickupMoreHp::size[0] / 8, 0);
+        glVertex2f( 0, pickupSize[1] * 3 / 7);
+        glVertex2f( pickupSize[0] / 10, pickupSize[1] * 3 / 7);
+        glVertex2f( pickupSize[0] / 10, 0);
 
     } glEnd();
 }
@@ -66,9 +61,9 @@ GLvoid PickupMoreHp::rectHorizontal() {
 
     glBegin(GL_QUADS); {
         glVertex2f( 0, 0);
-        glVertex2f( 0, PickupMoreHp::size[1] / 5);
-        glVertex2f( PickupMoreHp::size[0] * 3 / 8, PickupMoreHp::size[1] / 5);
-        glVertex2f( PickupMoreHp::size[0] * 3 / 8, 0);
+        glVertex2f( 0, pickupSize[1] / 7);
+        glVertex2f( pickupSize[0] * 3 / 10, pickupSize[1] / 7);
+        glVertex2f( pickupSize[0] * 3 / 10, 0);
 
     } glEnd();
 }
@@ -77,26 +72,29 @@ GLvoid PickupMoreHp::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - PickupMoreHp::halfSize[0], this->position[1] - PickupMoreHp::halfSize[1], 0);
+    glTranslatef(this->position[0] - pickupHalfSize[0], this->position[1] - pickupHalfSize[1], 0);
 
-    this->bottomTriangle();
+    this->background();
 
     glPushMatrix();
 
-    glTranslatef(0, PickupMoreHp::size[1] * 2 / 5, 0);
+    glTranslatef(pickupSize[0] / 10, pickupSize[1] / 7, 0);
+    this->bottomTriangle();
+
+    glTranslatef(0, pickupSize[1] * 2 / 7, 0);
     this->leftArcTriangle();
     this->rightArcTriangle();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(PickupMoreHp::size[0] * 5 / 8, PickupMoreHp::size[1] * 2 / 5, 0);
+    glTranslatef(pickupSize[0] * 3 / 5, pickupSize[1] * 3 / 7, 0);
     this->rectHorizontal();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(PickupMoreHp::size[0] * 3 / 4, PickupMoreHp::size[1] / 5, 0);
+    glTranslatef(pickupSize[0] * 7 / 10, pickupSize[1] * 2 / 7, 0);
     this->rectVertical();
 
     glPopMatrix();

@@ -5,8 +5,8 @@
 #include "Bullet/Bullet.h"
 #include "Enemy/EnemyFire.h"
 #include "Menu/MainMenu.h"
-#include "ElementsUI/HpHeart.h"
-#include "Enemy/MineTransporter.h"
+#include "UiElements/HpHeart.h"
+#include "Enemy/EnemyMiner.h"
 #include "Pickup/PickupMoreHp.h"
 #include "Pickup/PickupMoreDamage.h"
 #include "Pickup/PickupTwoBullets.h"
@@ -66,7 +66,7 @@ struct gamelevel* level2 = new struct gamelevel;
 GLvoid setupLevels() {
     // Level 1
     level1->enemyBorderHitMax = 3;
-    level1->enemySpeed = 2;
+    level1->enemySpeed = 1;
     level1->pickupSpeed = 1;
     level1->enemySpeedIncremental = 0.1f;
     level1->occupiedPercentageX = 70;
@@ -127,7 +127,7 @@ GLvoid createEnemies() {
                     idxEnemiesThatFire.insert(idx);
                     break;
                 case 2:
-                    enemies.push_back( new MineTransporter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
+                    enemies.push_back( new EnemyMiner(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
                     break;
                 default:
                     throw std::invalid_argument("Bad enemy type TODO");
@@ -145,17 +145,21 @@ GLvoid createEnemies() {
 
             switch (i) {
                 case 0:
-                    p = new PickupMoreHp(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    p = new PickupMoreHp(1);
                     break;
                 case 1:
-                    p = new PickupTwoBullets(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    p = new PickupTwoBullets();
                     break;
                 case 2:
-                    p = new PickupMoreDamage(MOVE_DIRS::DOWN, currentLevel->pickupSpeed);
+                    p = new PickupMoreDamage(5);
                     break;
                 default:
                     throw std::invalid_argument("Bad pickup");
             }
+
+            // Set pickup direction and speed
+            p->setDirection(MOVE_DIRS::DOWN);
+            p->setSpeed(currentLevel->pickupSpeed);
 
             for (GLint j = 0; j < num; j++) {
                 if (idxEnemiesCanDrop.empty()) {

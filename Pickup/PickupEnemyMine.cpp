@@ -4,15 +4,12 @@
 
 #include "PickupEnemyMine.h"
 
-GLfloat PickupEnemyMine::size[2] = { 8, 4 };
-GLfloat PickupEnemyMine::halfSize[2] = { PickupEnemyMine::size[0] / 2, PickupEnemyMine::size[1] / 2 };
-
-PickupEnemyMine::PickupEnemyMine(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed) : Pickup(x, y, dir, speed) {
-    this->damage = 2; // default damage value
+PickupEnemyMine::PickupEnemyMine(GLint dmg) : Pickup() {
+    this->setDamage(2);
 }
 
-GLvoid PickupEnemyMine::setDamage(GLshort d) {
-    if (d < 0) throw std::invalid_argument("Bad mine damage, needs to be >=0.");
+GLvoid PickupEnemyMine::setDamage(GLint d) {
+    if (d <= 0) throw std::invalid_argument("Pickup (EnemyMine) damage needs to be greater than 0");
 
     this->damage = d;
 }
@@ -22,9 +19,9 @@ GLvoid PickupEnemyMine::body() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, PickupEnemyMine::size[1]);
-        glVertex2f(PickupEnemyMine::size[0], PickupEnemyMine::size[1]);
-        glVertex2f(PickupEnemyMine::size[0], 0);
+        glVertex2f(0, pickupSize[1]);
+        glVertex2f(pickupSize[0], pickupSize[1]);
+        glVertex2f(pickupSize[0], 0);
     } glEnd();
 }
 
@@ -33,9 +30,9 @@ GLvoid PickupEnemyMine::plate() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, PickupEnemyMine::halfSize[1]);
-        glVertex2f(PickupEnemyMine::size[0] / 4, PickupEnemyMine::halfSize[1]);
-        glVertex2f(PickupEnemyMine::size[0] / 4, 0);
+        glVertex2f(0, pickupHalfSize[1]);
+        glVertex2f(pickupSize[1] * 3 / 7, pickupHalfSize[1]);
+        glVertex2f(pickupSize[1] * 3 / 7, 0);
     } glEnd();
 }
 
@@ -43,13 +40,13 @@ GLvoid PickupEnemyMine::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - PickupEnemyMine::halfSize[0], this->position[1] - PickupEnemyMine::halfSize[1], 0);
+    glTranslatef(this->position[0] - pickupHalfSize[0], this->position[1] - pickupHalfSize[1], 0);
 
     this->body();
 
     glPushMatrix();
 
-    glTranslatef(PickupEnemyMine::size[0] * 3 / 8, PickupEnemyMine::size[1] / 4, 0);
+    glTranslatef(pickupSize[1] * 3 / 10, pickupSize[1] * 2 / 7, 0);
     this->plate();
 
     glPopMatrix();
@@ -57,7 +54,7 @@ GLvoid PickupEnemyMine::draw() {
 }
 
 GLvoid PickupEnemyMine::playerEffect(PlayerShip *playerShip) {
-    playerShip->takeDamage(2);
+    playerShip->takeDamage(this->damage);
 }
 
 PickupEnemyMine* PickupEnemyMine::clone() {

@@ -11,10 +11,7 @@
 
 class PickupMoreHp : public Pickup {
 private:
-    static GLfloat size[2];
-    static GLfloat halfSize[2];
-
-    GLshort hpGain;
+    GLint hpGain;
 
     GLvoid leftArcTriangle();
     GLvoid rightArcTriangle();
@@ -22,11 +19,10 @@ private:
     GLvoid rectVertical();
     GLvoid rectHorizontal();
 public:
-    PickupMoreHp(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
-    PickupMoreHp(MOVE_DIRS dir, GLfloat speed);
+    PickupMoreHp(GLint hpGain);
     ~PickupMoreHp() = default;
 
-    GLvoid setHpGain(GLshort h);
+    GLvoid setHpGain(GLint h);
 
     GLvoid draw() override;
     GLvoid playerEffect(PlayerShip* playerShip) override;

@@ -11,18 +11,15 @@
 
 class PickupEnemyMine : public Pickup {
 private:
-    static GLfloat size[2];
-    static GLfloat halfSize[2];
-
-    GLshort damage;
+    GLint damage;
 
     GLvoid body();
     GLvoid plate();
 public:
-    PickupEnemyMine(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
+    PickupEnemyMine(GLint dmg);
     ~PickupEnemyMine() = default;
 
-    GLvoid setDamage(GLshort d);
+    GLvoid setDamage(GLint d);
 
     GLvoid draw() override;
     GLvoid playerEffect(PlayerShip* playerShip) override;

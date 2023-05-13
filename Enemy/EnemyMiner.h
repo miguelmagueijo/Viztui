@@ -3,14 +3,14 @@
 //
 
 #pragma once
-#ifndef VIZTUI_MINETRANSPORTER_H
-#define VIZTUI_MINETRANSPORTER_H
+#ifndef VIZTUI_ENEMYMINER_H
+#define VIZTUI_ENEMYMINER_H
 
 #include "../Viztui.lib.h"
 #include "Enemy.h"
 #include "../Pickup/PickupEnemyMine.h"
 
-class MineTransporter : public Enemy {
+class EnemyMiner : public Enemy {
 private:
     GLvoid body();
     GLvoid cockpit();
@@ -18,11 +18,11 @@ private:
     GLvoid mine();
 
 public:
-    MineTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
-    ~MineTransporter() = default;
+    EnemyMiner(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
+    ~EnemyMiner() = default;
 
     GLvoid draw() override;
 };
 
 
-#endif //VIZTUI_MINETRANSPORTER_H
+#endif //VIZTUI_ENEMYMINER_H

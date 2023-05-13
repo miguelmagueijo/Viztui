@@ -11,20 +11,16 @@
 
 class PickupMoreDamage : public Pickup {
 private:
-    static GLfloat size[2];
-    static GLfloat halfSize[2];
-
-    GLshort dmgGain;
+    GLfloat dmgGain;
 
     GLvoid triangle();
     GLvoid bulletBody();
     GLvoid bulletHead();
 public:
-    PickupMoreDamage(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
-    PickupMoreDamage(MOVE_DIRS dir, GLfloat speed);
+    PickupMoreDamage(GLfloat dmgGain);
     ~PickupMoreDamage() = default;
 
-    GLvoid setDamageGain(GLshort h);
+    GLvoid setDamageGain(GLfloat h);
 
     GLvoid draw() override;
     GLvoid playerEffect(PlayerShip* playerShip) override;

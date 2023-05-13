@@ -2,13 +2,13 @@
 // Created by Miguel Magueijo on 04/05/2023.
 //
 
-#include "MineTransporter.h"
+#include "EnemyMiner.h"
 
-MineTransporter::MineTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {
-    this->setPickup(new PickupEnemyMine(0, 0, MOVE_DIRS::DOWN, 2));
+EnemyMiner::EnemyMiner(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {
+    this->setPickup(new PickupEnemyMine(2));
 }
 
-GLvoid MineTransporter::body() {
+GLvoid EnemyMiner::body() {
     glColor3f(0.87f, 0.44f, 0.44f);
 
     glBegin(GL_QUADS); {
@@ -19,7 +19,7 @@ GLvoid MineTransporter::body() {
     } glEnd();
 }
 
-GLvoid MineTransporter::cockpit() {
+GLvoid EnemyMiner::cockpit() {
     glColor3f(0.34f, 0.60f, 1.00f);
 
     glBegin(GL_QUADS); {
@@ -30,7 +30,7 @@ GLvoid MineTransporter::cockpit() {
     } glEnd();
 }
 
-GLvoid MineTransporter::wing() {
+GLvoid EnemyMiner::wing() {
     glColor3f(0.29f, 0.31f, 0.76f);
 
     glBegin(GL_QUADS); {
@@ -41,7 +41,7 @@ GLvoid MineTransporter::wing() {
     } glEnd();
 }
 
-GLvoid MineTransporter::mine() {
+GLvoid EnemyMiner::mine() {
     glColor3f(0.22f, 0.72f, 0.33f);
 
     glBegin(GL_QUADS); {
@@ -52,7 +52,7 @@ GLvoid MineTransporter::mine() {
     } glEnd();
 }
 
-GLvoid MineTransporter::draw() {
+GLvoid EnemyMiner::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 

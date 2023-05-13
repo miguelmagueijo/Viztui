@@ -11,14 +11,10 @@
 
 class PickupTwoBullets : public Pickup {
 private:
-    static GLfloat size[2];
-    static GLfloat halfSize[2];
-
     GLvoid bulletBody();
     GLvoid bulletHead();
 public:
-    PickupTwoBullets(GLfloat x, GLfloat y, MOVE_DIRS dir, GLfloat speed);
-    PickupTwoBullets(MOVE_DIRS dir, GLfloat speed);
+    PickupTwoBullets();
     ~PickupTwoBullets() = default;
 
     GLvoid draw() override;
