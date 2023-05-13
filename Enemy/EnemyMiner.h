@@ -18,7 +18,7 @@ private:
     GLvoid mine();
 
 public:
-    EnemyMiner(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
+    EnemyMiner(GLfloat x, GLfloat y, GLfloat hp);
     ~EnemyMiner() = default;
 
     GLvoid draw() override;

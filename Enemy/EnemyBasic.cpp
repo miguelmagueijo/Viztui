@@ -4,7 +4,7 @@
 
 #include "EnemyBasic.h"
 
-EnemyBasic::EnemyBasic(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {}
+EnemyBasic::EnemyBasic(GLfloat x, GLfloat y, GLfloat hp) : Enemy(x, y, hp) {}
 
 GLvoid EnemyBasic::body() {
     if (!this->hasPickup)

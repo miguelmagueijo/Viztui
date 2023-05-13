@@ -16,7 +16,7 @@ private:
     GLvoid rocket();
 
 public:
-    EnemyBasic(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
+    EnemyBasic(GLfloat x, GLfloat y, GLfloat hp);
     ~EnemyBasic() = default;
 
     GLvoid draw();

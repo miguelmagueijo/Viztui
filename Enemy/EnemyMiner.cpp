@@ -4,7 +4,7 @@
 
 #include "EnemyMiner.h"
 
-EnemyMiner::EnemyMiner(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {
+EnemyMiner::EnemyMiner(GLfloat x, GLfloat y, GLfloat hp) : Enemy(x, y, hp) {
     this->setPickup(new PickupEnemyMine(2));
 }
 

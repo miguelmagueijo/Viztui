@@ -19,7 +19,7 @@ private:
     GLvoid rightWing();
 
 public:
-    EnemyFire(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
+    EnemyFire(GLfloat x, GLfloat y, GLfloat hp);
     ~EnemyFire() = default;
 
     GLvoid draw() override;

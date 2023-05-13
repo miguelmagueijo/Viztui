@@ -17,7 +17,6 @@ protected:
     static const GLfloat COCKPIT_COLOR[3];
 
     GLfloat position[2] {0.0f, 0.0f }; // initializes position in 0, 0
-    GLfloat speed;
     GLfloat hp;
     GLboolean hasPickup;
     Pickup* pickup;
@@ -25,7 +24,7 @@ protected:
 public:
     static constexpr GLfloat size[2] { 20,  10};
 
-    Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp);
+    Enemy(GLfloat x, GLfloat y, GLfloat hp);
     ~Enemy() = default;
 
     GLboolean dropsPickup();
@@ -34,7 +33,7 @@ public:
     GLfloat* getPosition();
     GLvoid takeDamage(GLfloat dmg);
     GLboolean isAlive();
-    GLvoid move(MOVE_DIRS dir);
+    GLvoid move(MOVE_DIRS dir, GLfloat distance);
 
 
     virtual GLvoid draw() = 0;

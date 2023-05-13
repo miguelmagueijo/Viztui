@@ -4,7 +4,7 @@
 
 #include "EnemyFire.h"
 
-EnemyFire::EnemyFire(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {};
+EnemyFire::EnemyFire(GLfloat x, GLfloat y, GLfloat hp) : Enemy(x, y, hp) {};
 
 GLvoid EnemyFire::body() {
     if (!this->hasPickup)

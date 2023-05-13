@@ -13,7 +13,6 @@
 #include <cstdlib>
 #include <ctime>
 #include <sstream>
-#include <set>
 
 
 const GLint MAX_ENEMY_COUNT_DOWN = 3;
@@ -57,7 +56,7 @@ std::vector<Enemy*> enemies;
 std::vector<Bullet*> bullets;
 std::vector<Pickup*> pickups;
 
-std::set<GLint> idxEnemiesThatFire;
+std::vector<GLint> idxEnemiesThatFire;
 
 struct gamelevel* level1 = new struct gamelevel;
 struct gamelevel* level2 = new struct gamelevel;
@@ -78,7 +77,7 @@ GLvoid setupLevels() {
 
     // Level 2
     level2->enemyBorderHitMax = 3;
-    level2->enemySpeed = 2;
+    level2->enemySpeed = 1.5f;
     level1->pickupSpeed = 1.25f;
     level2->enemySpeedIncremental = 0.1f;
     level2->occupiedPercentageX = 70;
@@ -100,6 +99,22 @@ GLvoid playerFireTimer(GLint value) {
     playerCanFire = true;
 }
 
+// Checks if object 1 (pos1, offset1) colliding with object 2 (pos2, offset2)
+GLboolean collissionBetween(const GLfloat* pos1, const GLfloat* offset1, const GLfloat* pos2, const GLfloat* offset2) {
+    return !(pos1[1] - offset1[1] >= pos2[1] + offset2[1] || // Object 1 MIN Y >= Object 2 MAX Y
+             pos1[1] + offset1[1] <= pos2[1] - offset2[1] || // Object 1 MAX Y <= Object 2 MIN Y
+             pos1[0] - offset1[0] >= pos2[0] + offset2[0] || // Object 1 MIN X >= Object 2 MAX X
+             pos1[0] + offset1[0] <= pos2[0] - offset2[0]);  // Object 1 MAX X <= Object 2 MIN X
+}
+
+// Checks if object is fully out of any world border (TOP, BOTTOM, RIGHT, LEFT)
+GLboolean isOutOfWorldBorders(const GLfloat* pos, const GLfloat* offset) {
+    return pos[1] - offset[1] > worldBorders[3] || // check top border
+           pos[1] + offset[1] < worldBorders[2] || // check bottom border
+           pos[0] - offset[0] > worldBorders[1] || // check right border
+           pos[0] + offset[0] < worldBorders[0];   // check left border
+}
+
 GLvoid createEnemies() {
     enemies.clear();
     GLint nLines = currentLevel->enemyTypePerLine.at(currWaveNum).size();
@@ -118,16 +133,16 @@ GLvoid createEnemies() {
 
             switch(enemyType) {
                 case 0:
-                    enemies.push_back( new EnemyBasic(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
+                    enemies.push_back( new EnemyBasic(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
                     idxEnemiesCanDrop.push_back(idx);
                     break;
                 case 1:
-                    enemies.push_back( new EnemyFire(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
+                    enemies.push_back( new EnemyFire(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
                     idxEnemiesCanDrop.push_back(idx);
-                    idxEnemiesThatFire.insert(idx);
+                    idxEnemiesThatFire.push_back(idx);
                     break;
                 case 2:
-                    enemies.push_back( new EnemyMiner(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
+                    enemies.push_back( new EnemyMiner(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
                     break;
                 default:
                     throw std::invalid_argument("Bad enemy type TODO");
@@ -253,48 +268,12 @@ GLvoid idle(GLvoid) {
     if (frameTimerUp) {
         // Bullets collisions
         for (GLint i = 0; i < bullets.size(); i++) {
+            GLboolean hasCollided = false;
             Bullet* b = bullets.at(i);
             bulletPosition = b->getPosition();
 
-            if (!b->damagesPlayer()) {
-                GLboolean hasCollided = false;
-                for (GLint j = 0; j < enemies.size(); j++) {
-                    Enemy* e = enemies.at(j);
-                    enemyPosition = e->getPosition();
-
-                    if ( !(enemyPosition[1] - enemySize[1] / 2 >= bulletPosition[1] + bulletHalfSize[1] || // inimigo min y > bullet max y
-                           enemyPosition[0] - enemySize[0] / 2 >= bulletPosition[0] + bulletHalfSize[0] || // inimigo min x > bullet max x
-                           enemyPosition[1] + enemySize[1] / 2 <= bulletPosition[1] - bulletHalfSize[1] || // inimigo max y < bullet min y
-                           enemyPosition[0] + enemySize[0] / 2 <= bulletPosition[0] - bulletHalfSize[0]) ) { // inimigo max x < bullet min x
-
-                        std::cout << "Collision bullet with enemy" << b->getDamage() << std::endl;
-
-
-                        e->takeDamage(b->getDamage());
-                        if (!e->isAlive()) {
-                            if (e->dropsPickup()) {
-                                std::cout << "here" << std::endl;
-                                pickups.push_back(e->getPickup());
-                            }
-
-                            enemies.erase(enemies.begin() + j);
-                        }
-
-                        bullets.erase(bullets.begin() + i);
-
-                        hasCollided = true;
-
-                        break;
-                    }
-                }
-
-                if (hasCollided) continue;
-
-            } else {
-                if (!(playerShipPosition[1] - playerShipHalfSize[1] >= bulletPosition[1] + bulletSize[1] / 2 || // inimigo min y > bullet max y
-                        playerShipPosition[0] - playerShipHalfSize[0] >= bulletPosition[0] + bulletSize[0] / 2 || // inimigo min x > bullet max x
-                        playerShipPosition[1] + playerShipHalfSize[1] <= bulletPosition[1] - bulletSize[1] / 2 || // inimigo max y < bullet min y
-                        playerShipPosition[0] + playerShipHalfSize[0] <= bulletPosition[0] - bulletSize[0] / 2)) {
+            if (b->damagesPlayer()) {
+                if (collissionBetween(playerShipPosition, playerShipHalfSize, bulletPosition, bulletHalfSize)) {
 
                     playerShip->takeDamage(static_cast<GLshort>(b->getDamage()));
                     bullets.erase(bullets.begin() + i);
@@ -302,16 +281,61 @@ GLvoid idle(GLvoid) {
                     if (!playerShip->isAlive())
                         gameOver = true;
 
-                    continue;
+                    hasCollided = true;
+                }
+            } else {
+                for (GLint j = 0; j < enemies.size(); j++) {
+                    Enemy* e = enemies.at(j);
+                    enemyPosition = e->getPosition();
+
+                    if (collissionBetween(enemyPosition, enemyHalfSize,
+                                          bulletPosition, bulletHalfSize)) {
+                        std::cout << "[DEBUG] Collision between bullet (idx "<< i <<
+                                  ") with enemy (idx "<< j <<") and applied "<< b->getDamage() <<" dmg" << std::endl;
+
+                        e->takeDamage(b->getDamage()); // enemy takes damage
+
+                        if (!e->isAlive()) {
+                            // Checks if drops pickup, if so, puts pickup in world
+                            if (e->dropsPickup()) {
+                                std::cout << "[DEBUG] Enemy (idx " << j << ") dropped a pickup" << std::endl;
+
+                                pickups.push_back(e->getPickup());
+                            }
+
+                            enemies.erase(enemies.begin() + j);
+                            std::cout << "[DEBUG] Enemy (idx " << j << ") was removed" << std::endl;
+
+                            if (!idxEnemiesThatFire.empty()) {
+                                for (GLint jj = 0; jj < idxEnemiesThatFire.size(); jj++) {
+                                    if (idxEnemiesThatFire.at(jj) == j) {
+                                        idxEnemiesThatFire.erase(idxEnemiesThatFire.begin() + jj);
+                                        std::cout << "Removed idx that fire" << std::endl;
+                                        break;
+                                    }
+                                }
+                            }
+
+                        }
+
+                        // Removes bullet because collided
+                        bullets.erase(bullets.begin() + i);
+
+                        hasCollided = true;
+
+                        break;
+                    }
                 }
             }
 
-            if (bulletPosition[1] - bulletHalfSize[1] > worldBorders[3] || // bullet min y > world max y
-                    bulletPosition[1] + bulletHalfSize[1] < worldBorders[2] || // bullet max y < world min y
-                    bulletPosition[0] - bulletHalfSize[0] > worldBorders[1] || // bullet min x > world max x
-                    bulletPosition[0] + bulletHalfSize[0] < worldBorders[0]) {
+            // Forces to check next bullet because this one has already been removed
+            if (hasCollided)
+                continue;
+
+            // If didn't collide with enemies or player, check if is outside world, if it is, removes it
+            if (isOutOfWorldBorders(bulletPosition, bulletHalfSize)) {
                 bullets.erase(bullets.begin() + i);
-                std::cout << "Bullet removed because collided with border" << std::endl;
+                std::cout << "[DEBUG] Bullet (idx: "<< i <<") removed because is outside of world" << std::endl;
             }
         }
 
@@ -320,10 +344,7 @@ GLvoid idle(GLvoid) {
             Pickup* p = pickups.at(i);
             pickupPosition = p->getPosition();
 
-            if (!(playerShipPosition[1] - playerShipHalfSize[1] >= pickupPosition[1] || // inimigo min y > bullet max y
-                  playerShipPosition[0] - playerShipHalfSize[0] >= pickupPosition[0] || // inimigo min x > bullet max x
-                  playerShipPosition[1] + playerShipHalfSize[1] <= pickupPosition[1] || // inimigo max y < bullet min y
-                  playerShipPosition[0] + playerShipHalfSize[0] <= pickupPosition[0])) {
+            if (collissionBetween(playerShipPosition, playerShipHalfSize, pickupPosition, pickupHalfSize)) {
 
                 p->playerEffect(playerShip);
                 pickups.erase(pickups.begin() + i);
@@ -335,12 +356,9 @@ GLvoid idle(GLvoid) {
                 break;
             }
 
-            if (pickupPosition[1] > worldBorders[3] || // bullet min y > world max y
-                pickupPosition[1] < worldBorders[2] || // bullet max y < world min y
-                pickupPosition[0] > worldBorders[1] || // bullet min x > world max x
-                pickupPosition[0] < worldBorders[0]) {
+            if (isOutOfWorldBorders(pickupPosition, pickupHalfSize)) {
                 pickups.erase(pickups.begin() + i);
-                std::cout << "Pickup removed because collided with border" << std::endl;
+                std::cout << "[DEBUG] Pickup (idx: "<< i <<") removed because is outside of world" << std::endl;
             }
         }
 
@@ -360,20 +378,19 @@ GLvoid idle(GLvoid) {
             if (enemyPosition[1] - enemyHalfSize[1] > enemyHitbox[3])
                 enemyHitbox[3] = enemyPosition[1] + enemyHalfSize[1];
 
-            if ( !(enemyPosition[1] - enemySize[1] / 2 >= playerShipPosition[1] + playerShipHalfSize[1] || // inimigo min y > player max y
-                   enemyPosition[0] - enemySize[0] / 2 >= playerShipPosition[0] + playerShipHalfSize[0] || // inimigo min x > player max x
-                   enemyPosition[1] + enemySize[1] / 2 <= playerShipPosition[1] - playerShipHalfSize[1] || // inimigo max y < player min y
-                   enemyPosition[0] + enemySize[0] / 2 <= playerShipPosition[0] - playerShipHalfSize[0]) ) { // inimigo max x < player min x
+            if (collissionBetween(enemyPosition, enemyHalfSize, playerShipPosition, playerShipHalfSize)) { // inimigo max x < player min x
                 std::cout << "Collision between player and enemies" << std::endl;
                 gameOver = true;
             }
         }
 
-        // Collision with borders
+        // Collision with X borders
         if ( (!areEnemiesMovingLeft && enemyHitbox[1] + 2 > worldBorders[1]) ||
-             (areEnemiesMovingLeft && enemyHitbox[0] - 2 < worldBorders[0]) ) {
+                (areEnemiesMovingLeft && enemyHitbox[0] - 2 < worldBorders[0]) ) {
             currEnemyCountDown++;
             areEnemiesMovingLeft = !areEnemiesMovingLeft;
+        } else if (enemyHitbox[2] <= worldBorders[2]) { // if enemies collide with bottom border
+            gameOver = true;
         }
 
         // Bullets movements
@@ -388,27 +405,32 @@ GLvoid idle(GLvoid) {
 
 
         // Enemies movements
+        GLfloat enemySpeed = currentLevel->enemySpeed;
         if (currEnemyCountDown == MAX_ENEMY_COUNT_DOWN) {
             enemyMoveDir = MOVE_DIRS::DOWN;
+            enemySpeed = enemySpeed * 2;
             currEnemyCountDown = 0;
         } else {
             enemyMoveDir = areEnemiesMovingLeft ? MOVE_DIRS::LEFT : MOVE_DIRS::RIGHT;
+            enemySpeed = currentLevel->enemySpeed;
         }
 
         for (Enemy* e : enemies) {
-            e->move(enemyMoveDir);
+            e->move(enemyMoveDir, enemySpeed);
         }
 
+        // Enemy fire
         if (enemyCanFire && !enemies.empty()) {
             enemyCanFire = false;
 
-            GLint enemyIndex = rand() % enemies.size();
+            GLint idx = rand() % idxEnemiesThatFire.size();
 
-            enemyPosition = enemies.at(enemyIndex)->getPosition();
+            enemyPosition = enemies.at(idxEnemiesThatFire.at(idx))->getPosition();
 
             Bullet* b = new Bullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN, false);
+
             b->setDamage(1);
-            b->setSpeed(2);
+            b->setSpeed(1.5f);
 
             bullets.push_back(b);
 
@@ -508,11 +530,12 @@ int main(int argc, char** argv) {
     glutCreateWindow("Viztui - The Space War");
 
     setupLevels();
-    currentLevel = level1;
+    currentLevel = level2;
 
     createEnemies();
 
     // Set display callback
+    //glutDisplayFunc(MainMenu::draw);
     glutDisplayFunc(draw);
 
     // Set keyboard callback
