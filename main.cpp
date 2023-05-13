@@ -19,6 +19,7 @@ const GLint MAX_ENEMY_COUNT_DOWN = 3;
 
 // Window size [Width, Height]
 GLint windowSize[2] = { 850, 850 };
+const GLfloat ASPECT_RATIO = windowSize[0] / windowSize[1];
 GLfloat halfWindowSize[2] = { static_cast<GLfloat>(windowSize[0] / 2), static_cast<GLfloat>(windowSize[1] / 2) };
 // World Borders by order Left, Right, Bottom, Up
 GLfloat worldBorders[4] = { -125, 125, -125, 125 };
@@ -27,8 +28,7 @@ GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
 GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
 
-struct gamelevel* currentLevel;
-GLboolean gameOver = false; // to be removed
+struct levelinfo* currentLevel;
 GAME_STATE gameState = GAME_STATE::PLAYING;
 GLint currWaveNum = 0;
 GLboolean frameTimerUp = false;
@@ -40,26 +40,17 @@ MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
 
 
-PlayerShip* playerShip = new PlayerShip((worldBorders[0] + abs(worldBorders[1] - worldBorders[0]) / 2), ( worldBorders[2] + playerShipSize[1] / 2 ) + 5, 4, 3);
-
 std::vector<HpHeart*> playerHpHeartsUI;
 
-/**
- * BASICAMENTE A CENA DA MINA DO INIMIGO É UM PICK-UP QUE TIRA VIDA
- * Fazer um metodo que gera inimigos consoante o dado, por linha e colunas
- * Fazer pickups
- * Usar scale para texto
- * fazer metodo para dizer se está fora do mundo
- */
-
+PlayerShip* playerShip;
 std::vector<Enemy*> enemies;
 std::vector<Bullet*> bullets;
 std::vector<Pickup*> pickups;
 
 std::vector<GLint> idxEnemiesThatFire;
 
-struct gamelevel* level1 = new struct gamelevel;
-struct gamelevel* level2 = new struct gamelevel;
+struct levelinfo* level1 = new struct levelinfo;
+struct levelinfo* level2 = new struct levelinfo;
 //struct level* level3 = new struct level;
 
 GLvoid setupLevels() {
@@ -78,7 +69,7 @@ GLvoid setupLevels() {
     // Level 2
     level2->enemyBorderHitMax = 3;
     level2->enemySpeed = 1.5f;
-    level1->pickupSpeed = 1.25f;
+    level2->pickupSpeed = 1.25f;
     level2->enemySpeedIncremental = 0.1f;
     level2->occupiedPercentageX = 70;
     level2->numWaves = 2;
@@ -130,19 +121,20 @@ GLvoid createEnemies() {
             GLfloat x = worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j;
             GLfloat y = worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i;
             GLint idx = enemies.size();
+            std::vector<GLfloat> enemyHpInfo = currentLevel->enemyHpPerWave.at(currWaveNum);
 
             switch(enemyType) {
                 case 0:
-                    enemies.push_back( new EnemyBasic(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
+                    enemies.push_back( new EnemyBasic(x, y, enemyHpInfo.at(0)) );
                     idxEnemiesCanDrop.push_back(idx);
                     break;
                 case 1:
-                    enemies.push_back( new EnemyFire(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
+                    enemies.push_back( new EnemyFire(x, y, enemyHpInfo.at(1)) );
                     idxEnemiesCanDrop.push_back(idx);
                     idxEnemiesThatFire.push_back(idx);
                     break;
                 case 2:
-                    enemies.push_back( new EnemyMiner(x, y, currentLevel->enemyHpPerWave.at(currWaveNum).at(2)) );
+                    enemies.push_back( new EnemyMiner(x, y, enemyHpInfo.at(2)) );
                     break;
                 default:
                     throw std::invalid_argument("Bad enemy type TODO");
@@ -195,20 +187,19 @@ GLvoid createEnemies() {
     }
 }
 
+GLvoid createPlayerShip() {
+    playerShip = new PlayerShip(
+                (worldBorders[0] + abs(worldBorders[1] - worldBorders[0]) / 2),
+                ( worldBorders[2] + playerShipSize[1] / 2 ) + 5,
+                4,
+                3
+            );
+    std::cout << "[DEBUG] PlayerShip created" << std::endl;
+}
 
-// Function that draws cartesian axis
-GLvoid drawAxis() {
-    glColor3f(1.0, 0.0, 0.0);
-
-    glBegin(GL_LINES); {
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(0.0f, 50.0f);
-    } glEnd();
-
-    glBegin(GL_LINES); {
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(50.0f, 0.0f);
-    } glEnd();
+GLvoid triggerGameOver() {
+    gameState = GAME_STATE::GAMEOVER;
+    frameTimerUp = false;
 }
 
 GLvoid draw(GLvoid) {
@@ -233,60 +224,60 @@ GLvoid draw(GLvoid) {
     // load identity matrix
     glLoadIdentity();
 
-    playerShip->draw();
-    //playerBullet->draw();
-    //soldierTransporter->draw();
-    //enemyFighter->draw();
-    //mineTransporter->draw();
+    for (Pickup* p : pickups) {
+        p->draw();
+    }
 
     for(Bullet* b : bullets) {
         b->draw();
-    }
-
-    for (Pickup* p : pickups) {
-        p->draw();
     }
 
     for (Enemy* e : enemies) {
         e->draw();
     }
 
+    playerShip->draw();
+
     for (GLshort i = 0; i < playerShip->getHp(); i++) {
         playerHpHeartsUI.at(i)->draw();
     }
-
-    drawAxis();
 
     glutSwapBuffers();
 }
 
 GLvoid idle(GLvoid) {
-    GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
-    GLfloat *playerShipPosition = playerShip->getPosition();
-    GLfloat *enemyPosition, *bulletPosition, *pickupPosition;
-
     if (frameTimerUp) {
-        // Bullets collisions
+        GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
+        GLfloat *playerShipPosition = playerShip->getPosition();
+
+        /**
+         * Collisions
+         */
+        // Bullet collisions
         for (GLint i = 0; i < bullets.size(); i++) {
             GLboolean hasCollided = false;
             Bullet* b = bullets.at(i);
-            bulletPosition = b->getPosition();
+            GLfloat* bulletPosition = b->getPosition();
 
             if (b->damagesPlayer()) {
-                if (collissionBetween(playerShipPosition, playerShipHalfSize, bulletPosition, bulletHalfSize)) {
+                if (collissionBetween(playerShipPosition, playerShipHalfSize,
+                                      bulletPosition, bulletHalfSize)
+                ) {
 
                     playerShip->takeDamage(static_cast<GLshort>(b->getDamage()));
                     bullets.erase(bullets.begin() + i);
 
-                    if (!playerShip->isAlive())
-                        gameOver = true;
+                    if (!playerShip->isAlive()) {
+                        triggerGameOver();
+                        return;
+                    }
 
                     hasCollided = true;
                 }
             } else {
                 for (GLint j = 0; j < enemies.size(); j++) {
                     Enemy* e = enemies.at(j);
-                    enemyPosition = e->getPosition();
+                    GLfloat* enemyPosition = e->getPosition();
 
                     if (collissionBetween(enemyPosition, enemyHalfSize,
                                           bulletPosition, bulletHalfSize)) {
@@ -307,12 +298,20 @@ GLvoid idle(GLvoid) {
                             std::cout << "[DEBUG] Enemy (idx " << j << ") was removed" << std::endl;
 
                             if (!idxEnemiesThatFire.empty()) {
-                                for (GLint jj = 0; jj < idxEnemiesThatFire.size(); jj++) {
-                                    if (idxEnemiesThatFire.at(jj) == j) {
-                                        idxEnemiesThatFire.erase(idxEnemiesThatFire.begin() + jj);
-                                        std::cout << "Removed idx that fire" << std::endl;
-                                        break;
-                                    }
+                                GLint idxToRemove = -1;
+
+                                for (GLint & idxEf : idxEnemiesThatFire) {
+                                    if (idxEf < j)
+                                        continue;
+                                    else if (idxEf == j)
+                                        idxToRemove = j;
+                                    else
+                                        idxEf -= 1;
+                                }
+
+                                if (idxToRemove >= 0) {
+                                    idxEnemiesThatFire.erase(idxEnemiesThatFire.begin() + idxToRemove);
+                                    std::cout << "Removed idx that fire" << std::endl;
                                 }
                             }
 
@@ -328,7 +327,7 @@ GLvoid idle(GLvoid) {
                 }
             }
 
-            // Forces to check next bullet because this one has already been removed
+            // Skips to next bullet because this one has already been removed
             if (hasCollided)
                 continue;
 
@@ -342,18 +341,20 @@ GLvoid idle(GLvoid) {
         // Pickup collisions
         for (GLint i = 0; i < pickups.size(); i++) {
             Pickup* p = pickups.at(i);
-            pickupPosition = p->getPosition();
+            GLfloat* pickupPosition = p->getPosition();
 
-            if (collissionBetween(playerShipPosition, playerShipHalfSize, pickupPosition, pickupHalfSize)) {
-
+            if (collissionBetween(playerShipPosition, playerShipHalfSize,
+                                  pickupPosition, pickupHalfSize)
+            ) {
                 p->playerEffect(playerShip);
                 pickups.erase(pickups.begin() + i);
 
-                if (!playerShip->isAlive()) {
-                    gameOver = true;
+                if (!playerShip->isAlive()) { // because of mine pickup
+                    triggerGameOver();
+                    return;
                 }
 
-                break;
+                continue;
             }
 
             if (isOutOfWorldBorders(pickupPosition, pickupHalfSize)) {
@@ -364,7 +365,7 @@ GLvoid idle(GLvoid) {
 
         // Enemies collisions
         for (Enemy* e : enemies) {
-            enemyPosition = e->getPosition();
+            GLfloat * enemyPosition = e->getPosition();
 
             if (enemyPosition[0] - enemyHalfSize[0] < enemyHitbox[0])
                 enemyHitbox[0] = enemyPosition[0] - enemyHalfSize[0];
@@ -378,9 +379,12 @@ GLvoid idle(GLvoid) {
             if (enemyPosition[1] - enemyHalfSize[1] > enemyHitbox[3])
                 enemyHitbox[3] = enemyPosition[1] + enemyHalfSize[1];
 
-            if (collissionBetween(enemyPosition, enemyHalfSize, playerShipPosition, playerShipHalfSize)) { // inimigo max x < player min x
-                std::cout << "Collision between player and enemies" << std::endl;
-                gameOver = true;
+            if (collissionBetween(enemyPosition, enemyHalfSize,
+                                  playerShipPosition, playerShipHalfSize)
+            ) { // inimigo max x < player min x
+                std::cout << "[DEBUG] Collision between player and enemy" << std::endl;
+                triggerGameOver();
+                return;
             }
         }
 
@@ -390,9 +394,17 @@ GLvoid idle(GLvoid) {
             currEnemyCountDown++;
             areEnemiesMovingLeft = !areEnemiesMovingLeft;
         } else if (enemyHitbox[2] <= worldBorders[2]) { // if enemies collide with bottom border
-            gameOver = true;
+            triggerGameOver();
+            return;
         }
 
+
+
+
+
+        /**
+         * MOVEMENTS
+         */
         // Bullets movements
         for (Bullet* b : bullets) {
             b->move();
@@ -402,7 +414,6 @@ GLvoid idle(GLvoid) {
         for (Pickup* p : pickups) {
             p->move();
         }
-
 
         // Enemies movements
         GLfloat enemySpeed = currentLevel->enemySpeed;
@@ -425,9 +436,14 @@ GLvoid idle(GLvoid) {
 
             GLint idx = rand() % idxEnemiesThatFire.size();
 
-            enemyPosition = enemies.at(idxEnemiesThatFire.at(idx))->getPosition();
+            GLfloat* enemyPosition = enemies.at(idxEnemiesThatFire.at(idx))->getPosition();
 
-            Bullet* b = new Bullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN, false);
+            Bullet* b = new Bullet(
+                                    enemyPosition[0],
+                                    enemyPosition[1] - enemyHalfSize[1] - 3,
+                                    MOVE_DIRS::DOWN,
+                                    false
+                                );
 
             b->setDamage(1);
             b->setSpeed(1.5f);
@@ -443,10 +459,9 @@ GLvoid idle(GLvoid) {
     }
 
     if (needsDraw) {
-        glutPostRedisplay();
+        draw();
         needsDraw = false;
     }
-
 }
 
 GLvoid keyboard(unsigned char key, int x, int y) {
@@ -489,7 +504,7 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             }
             break;
         case 'p':
-            gameOver = true;
+            triggerGameOver();
             break;
 
     }
@@ -498,12 +513,17 @@ GLvoid keyboard(unsigned char key, int x, int y) {
 GLvoid gameTimer(GLint value) {
     frameTimerUp = true;
 
-    if (!gameOver)
+    if (gameState == GAME_STATE::PLAYING)
         glutTimerFunc(16, gameTimer, 0);
 }
 
+GLvoid onWindowResize(int w, int h) {
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+}
+
 int main(int argc, char** argv) {
-    srand(time(nullptr));
+    srand(time(nullptr)); // seed random generator
 
     GLfloat initialHeartsPosition[2] = {
                                         worldBorders[0] + HpHeart::hpHeartSize[0] + 2,
@@ -511,7 +531,10 @@ int main(int argc, char** argv) {
                                     };
     GLfloat spaceXHearts = 2;
     for (GLshort i = 0; i < PlayerShip::getMaxHp(); i++) {
-        playerHpHeartsUI.push_back(new HpHeart(initialHeartsPosition[0] + (HpHeart::hpHeartSize[0] + spaceXHearts) * i, initialHeartsPosition[1]));
+        playerHpHeartsUI.push_back(new HpHeart(
+                                            initialHeartsPosition[0] + (HpHeart::hpHeartSize[0] + spaceXHearts) * i,
+                                            initialHeartsPosition[1])
+                                            );
     }
 
     // Init glut environment
@@ -533,6 +556,7 @@ int main(int argc, char** argv) {
     currentLevel = level2;
 
     createEnemies();
+    createPlayerShip();
 
     // Set display callback
     //glutDisplayFunc(MainMenu::draw);

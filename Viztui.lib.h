@@ -26,19 +26,20 @@ extern GLfloat enemySize[2];
 extern GLfloat enemyHalfSize[2];
 
 enum class MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
-enum class GAME_STATE { PLAYING, PAUSED, OVER };
+enum class GAME_STATE { PLAYING, PAUSED, GAMEOVER };
 
-typedef struct gamelevel {
+typedef struct levelinfo {
     GLint occupiedPercentageX;
     GLint enemyBorderHitMax;
     GLfloat enemySpeed;
+    GLfloat enemySpeedDown;
     GLfloat pickupSpeed;
     GLfloat enemySpeedIncremental; // increments speed for each moves down
     GLint numWaves; // also the size of the next 3 vectors
     std::vector<std::vector<GLint>> enemyTypePerLine; // 0 -> Basic, 1 -> Fire, 2 -> Miner
     std::vector<std::vector<GLfloat>> enemyHpPerWave; // hp of 0 -> basic, 1 -> fire, 2 -> miner
     std::vector<std::vector<GLint>> pickupsPerWave; // idx corresponds to 0 -> MoreHp, 1 -> TwoBullets, 3 -> MoreDamage
-    struct gamelevel* nextLevel;
-} gamelevel;
+    struct levelinfo* nextLevel;
+} levelinfo;
 
 #endif //VIZTUI_VIZTUI_LIB_H
