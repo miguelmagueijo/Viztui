@@ -1,10 +1,9 @@
 #include "Viztui.lib.h"
 #include "./PlayerShip/PlayerShip.h"
-#include "./Bullet/Bullet.h"
 #include "./Enemy/Enemy.h"
-#include "./Enemy/SoldierTransporter.h"
-#include "Bullet/EnemyBullet.h"
-#include "Enemy/Fighter.h"
+#include "./Enemy/EnemyBasic.h"
+#include "Bullet/Bullet.h"
+#include "Enemy/EnemyFire.h"
 #include "Menu/MainMenu.h"
 #include "ElementsUI/HpHeart.h"
 #include "Enemy/MineTransporter.h"
@@ -28,21 +27,6 @@ GLfloat worldBorders[4] = { -125, 125, -125, 125 };
 // Sizes
 GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
 GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
-GLfloat bulletSize[2] = { 2, 5};
-GLfloat bulletHalfSize[2] = { bulletSize[0] / 2, bulletSize[1] / 2 };
-
-struct gamelevel {
-    GLint occupiedPercentageX;
-    GLint enemyBorderHitMax;
-    GLfloat enemySpeed;
-    GLfloat pickupSpeed;
-    GLfloat enemySpeedIncremental; // increments speed for each moves down
-    GLint numWaves; // also the size of the next 3 vectors
-    std::vector<std::vector<GLint>> enemyTypePerLine; // 0 -> Basic, 1 -> Fire, 2 -> Miner
-    std::vector<std::vector<GLfloat>> enemyHpPerWave; // hp of 0 -> basic, 1 -> fire, 2 -> miner
-    std::vector<std::vector<GLint>> pickupsPerWave; // idx corresponds to 0 -> MoreHp, 1 -> TwoBullets, 3 -> MoreDamage
-    struct gamelevel* nextLevel;
-} gamelevel;
 
 struct gamelevel* currentLevel;
 GLboolean gameOver = false; // to be removed
@@ -83,7 +67,7 @@ GLvoid setupLevels() {
     // Level 1
     level1->enemyBorderHitMax = 3;
     level1->enemySpeed = 2;
-    level1->pickupSpeed = 1.5f;
+    level1->pickupSpeed = 1;
     level1->enemySpeedIncremental = 0.1f;
     level1->occupiedPercentageX = 70;
     level1->numWaves = 1;
@@ -95,7 +79,7 @@ GLvoid setupLevels() {
     // Level 2
     level2->enemyBorderHitMax = 3;
     level2->enemySpeed = 2;
-    level1->pickupSpeed = 2;
+    level1->pickupSpeed = 1.25f;
     level2->enemySpeedIncremental = 0.1f;
     level2->occupiedPercentageX = 70;
     level2->numWaves = 2;
@@ -134,11 +118,11 @@ GLvoid createEnemies() {
 
             switch(enemyType) {
                 case 0:
-                    enemies.push_back( new SoldierTransporter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
+                    enemies.push_back( new EnemyBasic(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(0)) );
                     idxEnemiesCanDrop.push_back(idx);
                     break;
                 case 1:
-                    enemies.push_back( new Fighter(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
+                    enemies.push_back( new EnemyFire(x, y, currentLevel->enemySpeed, currentLevel->enemyHpPerWave.at(currWaveNum).at(1)) );
                     idxEnemiesCanDrop.push_back(idx);
                     idxEnemiesThatFire.insert(idx);
                     break;
@@ -153,6 +137,7 @@ GLvoid createEnemies() {
 
     if (!idxEnemiesCanDrop.empty()) {
         std::vector<GLint> currPickupsWave = currentLevel->pickupsPerWave.at(currWaveNum);
+
         for (GLint i = 0; i < currPickupsWave.size(); i++) {
             GLboolean breakLoop = false;
             GLint num = currPickupsWave.at(i);
@@ -179,6 +164,9 @@ GLvoid createEnemies() {
                 }
 
                 GLint v = rand() % idxEnemiesCanDrop.size();
+
+                std::cout << "[DEBUG] Pickup type " << i << " on enemy idx " << idxEnemiesCanDrop.at(v) << std::endl;
+
                 enemies.at(idxEnemiesCanDrop.at(v))->setPickup(p);
                 idxEnemiesCanDrop.erase(idxEnemiesCanDrop.begin() + v);
             }
@@ -414,7 +402,7 @@ GLvoid idle(GLvoid) {
 
             enemyPosition = enemies.at(enemyIndex)->getPosition();
 
-            Bullet* b = new EnemyBullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN);
+            Bullet* b = new Bullet(enemyPosition[0], enemyPosition[1] - enemyHalfSize[1] - 3, MOVE_DIRS::DOWN, false);
             b->setDamage(1);
             b->setSpeed(2);
 
@@ -467,7 +455,7 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             break;
         case ' ':
             if (playerCanFire) {
-                std::vector<PlayerBullet*> playerBullets = playerShip->fireBullet();
+                std::vector<Bullet*> playerBullets = playerShip->fireBullet();
                 bullets.insert(bullets.end(), playerBullets.begin(), playerBullets.end());
                 playerCanFire = false;
                 glutTimerFunc(350, playerFireTimer, 0);

@@ -9,14 +9,18 @@ const GLfloat playerShipSize[2] = { 30.0f, 22.5f };
 // Better use more memory than doing the division all the time it needs it
 const GLfloat playerShipHalfSize[2] = { playerShipSize[0] / 2, playerShipSize[1] / 2 };
 
+const GLfloat PlayerShip::PRIMARY_COLOR[3] = { 0.78f, 0.61f, 0.19f };
+const GLfloat PlayerShip::SECONDARY_COLOR[3] = { 0.42f, 0.50f, 0.39f };
+const GLfloat PlayerShip::COCKPIT_COLOR[3] = { 0.34f, 0.60f, 1.00f };
+
 PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->position[0] = x;
     this->position[1] = y;
     this->speed = speed;
     this->hp = hp;
     this->bulletDmg = 5;
-    this->bullet = new PlayerBullet();
-    this->bullet->setSpeed(2);
+    this->bullet = new Bullet(true);
+    this->bullet->setSpeed(3);
     this->bullet->setDamage(5);
     this->canFireExtra = false;
     this->currentAngle = 0;
@@ -38,8 +42,8 @@ GLshort PlayerShip::getMaxHp() {
     return PlayerShip::maxHp;
 }
 
-GLvoid PlayerShip::body(GLvoid) {
-    glColor3f(0.77f, 0.61f, 0.19f);
+GLvoid PlayerShip::body() {
+    glColor3f(PlayerShip::PRIMARY_COLOR[0], PlayerShip::PRIMARY_COLOR[1], PlayerShip::PRIMARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0.0f, 0.0f);
@@ -48,8 +52,8 @@ GLvoid PlayerShip::body(GLvoid) {
     } glEnd();
 }
 
-GLvoid PlayerShip::cockpit(GLvoid) {
-    glColor3f(0.34f, 0.60f, 1.00f);
+GLvoid PlayerShip::cockpit() {
+    glColor3f(PlayerShip::COCKPIT_COLOR[0], PlayerShip::COCKPIT_COLOR[1], PlayerShip::COCKPIT_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0.0f, 0.0f);
@@ -59,8 +63,8 @@ GLvoid PlayerShip::cockpit(GLvoid) {
     } glEnd();
 }
 
-GLvoid PlayerShip::leftWing(GLvoid) {
-    glColor3f(0.0, 1.0f, 0.0f);
+GLvoid PlayerShip::leftWing() {
+    glColor3f(PlayerShip::SECONDARY_COLOR[0], PlayerShip::SECONDARY_COLOR[1], PlayerShip::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(playerShipHalfSize[0], 0.0f);
@@ -70,7 +74,7 @@ GLvoid PlayerShip::leftWing(GLvoid) {
 }
 
 GLvoid PlayerShip::rightWing(GLvoid) {
-    glColor3f(0.0, 1.0f, 0.0f);
+    glColor3f(PlayerShip::SECONDARY_COLOR[0], PlayerShip::SECONDARY_COLOR[1], PlayerShip::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0.0f, 0.0f);
@@ -80,7 +84,7 @@ GLvoid PlayerShip::rightWing(GLvoid) {
 }
 
 GLvoid PlayerShip::cannon(GLvoid) {
-    glColor3f(0.77f, 0.61f, 0.19f);
+    glColor3f(PlayerShip::PRIMARY_COLOR[0], PlayerShip::PRIMARY_COLOR[1], PlayerShip::PRIMARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0.0f, 0.0f);
@@ -221,10 +225,10 @@ GLvoid PlayerShip::rotate(MOVE_DIRS rDir) {
     }
 }
 
-std::vector<PlayerBullet*> PlayerShip::fireBullet() {
-    std::vector<PlayerBullet*> bullets;
+std::vector<Bullet*> PlayerShip::fireBullet() {
+    std::vector<Bullet*> bullets;
 
-    PlayerBullet* newBullet = this->bullet->clone();
+    Bullet* newBullet = this->bullet->clone();
 
     switch (this->currentAngle) {
         case 0:
@@ -251,8 +255,8 @@ std::vector<PlayerBullet*> PlayerShip::fireBullet() {
     bullets.push_back(newBullet);
 
     if (this->canFireExtra) {
-        PlayerBullet* leftBullet = this->bullet->clone();
-        PlayerBullet* rightBullet = this->bullet->clone();
+        Bullet* leftBullet = this->bullet->clone();
+        Bullet* rightBullet = this->bullet->clone();
 
         leftBullet->setDamage(this->bulletDmg / 2);
         rightBullet->setDamage(this->bulletDmg / 2);

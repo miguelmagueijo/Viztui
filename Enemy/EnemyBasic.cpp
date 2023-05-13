@@ -2,12 +2,15 @@
 // Created by Miguel Magueijo on 03/05/2023.
 //
 
-#include "SoldierTransporter.h"
+#include "EnemyBasic.h"
 
-SoldierTransporter::SoldierTransporter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {}
+EnemyBasic::EnemyBasic(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {}
 
-GLvoid SoldierTransporter::body() {
-    glColor3f(0.87f, 0.44f, 0.44f);
+GLvoid EnemyBasic::body() {
+    if (!this->hasPickup)
+        glColor3f(Enemy::PRIMARY_COLOR[0], Enemy::PRIMARY_COLOR[1], Enemy::PRIMARY_COLOR[2]);
+    else
+        glColor3f(Enemy::SPECIAL_PRIMARY_COLOR[0], Enemy::SPECIAL_PRIMARY_COLOR[1], Enemy::SPECIAL_PRIMARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -17,8 +20,8 @@ GLvoid SoldierTransporter::body() {
     } glEnd();
 }
 
-GLvoid SoldierTransporter::cockpit() {
-    glColor3f(0.34f, 0.60f, 1.00f);
+GLvoid EnemyBasic::cockpit() {
+    glColor3f(Enemy::COCKPIT_COLOR[0], Enemy::COCKPIT_COLOR[1], Enemy::COCKPIT_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -28,8 +31,8 @@ GLvoid SoldierTransporter::cockpit() {
     } glEnd();
 }
 
-GLvoid SoldierTransporter::rocket() {
-    glColor3f(0.29f, 0.31f, 0.76f);
+GLvoid EnemyBasic::rocket() {
+    glColor3f(Enemy::SECONDARY_COLOR[0], Enemy::SECONDARY_COLOR[1], Enemy::SECONDARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -39,7 +42,7 @@ GLvoid SoldierTransporter::rocket() {
     } glEnd();
 }
 
-GLvoid SoldierTransporter::draw() {
+GLvoid EnemyBasic::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 

@@ -19,7 +19,7 @@ GLvoid showText(std::string text, GLfloat xPosScreen, GLfloat yPosScreen, GLbool
     }
 
 
-    glWindowPos2f(-(textWidth / 2) + xPosScreen, yPosScreen);
+    glRasterPos2f(-(textWidth / 2) + xPosScreen, yPosScreen);
 
     while(buffer.get(c)) {
         glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, c);

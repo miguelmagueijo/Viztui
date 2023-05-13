@@ -2,12 +2,15 @@
 // Created by Miguel Magueijo on 03/05/2023.
 //
 
-#include "Fighter.h"
+#include "EnemyFire.h"
 
-Fighter::Fighter(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {};
+EnemyFire::EnemyFire(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) : Enemy(x, y, speed, hp) {};
 
-GLvoid Fighter::body() {
-    glColor3f(0.87f, 0.44f, 0.44f);
+GLvoid EnemyFire::body() {
+    if (!this->hasPickup)
+        glColor3f(Enemy::PRIMARY_COLOR[0], Enemy::PRIMARY_COLOR[1], Enemy::PRIMARY_COLOR[2]);
+    else
+        glColor3f(Enemy::SPECIAL_PRIMARY_COLOR[0], Enemy::SPECIAL_PRIMARY_COLOR[1], Enemy::SPECIAL_PRIMARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -17,8 +20,8 @@ GLvoid Fighter::body() {
     } glEnd();
 }
 
-GLvoid Fighter::cockpit() {
-    glColor3f(0.34f, 0.60f, 1.00f);
+GLvoid EnemyFire::cockpit() {
+    glColor3f(Enemy::COCKPIT_COLOR[0], Enemy::COCKPIT_COLOR[1], Enemy::COCKPIT_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -28,8 +31,8 @@ GLvoid Fighter::cockpit() {
     } glEnd();
 }
 
-GLvoid Fighter::cannon() {
-    glColor3f(0.00f, 0.56f, 0.19f);
+GLvoid EnemyFire::cannon() {
+    glColor3f(Enemy::SECONDARY_COLOR[0], Enemy::SECONDARY_COLOR[1], Enemy::SECONDARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
@@ -39,8 +42,8 @@ GLvoid Fighter::cannon() {
     } glEnd();
 }
 
-GLvoid Fighter::leftWing() {
-    glColor3f(0.29f, 0.31f, 0.76f);
+GLvoid EnemyFire::leftWing() {
+    glColor3f(Enemy::SECONDARY_COLOR[0], Enemy::SECONDARY_COLOR[1], Enemy::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0, 0);
@@ -49,8 +52,8 @@ GLvoid Fighter::leftWing() {
     } glEnd();
 }
 
-GLvoid Fighter::rightWing() {
-    glColor3f(0.29f, 0.31f, 0.76f);
+GLvoid EnemyFire::rightWing() {
+    glColor3f(Enemy::SECONDARY_COLOR[0], Enemy::SECONDARY_COLOR[1], Enemy::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(enemySize[0] * 7 / 10, 0);
@@ -59,7 +62,7 @@ GLvoid Fighter::rightWing() {
     } glEnd();
 }
 
-GLvoid Fighter::draw() {
+GLvoid EnemyFire::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 

@@ -10,6 +10,11 @@
 
 class Enemy {
 protected:
+    static const GLfloat PRIMARY_COLOR[3];
+    static const GLfloat SPECIAL_PRIMARY_COLOR[3];
+    static const GLfloat SECONDARY_COLOR[3];
+    static const GLfloat COCKPIT_COLOR[3];
+
     GLfloat position[2] {0.0f, 0.0f }; // initializes position in 0, 0
     GLfloat speed;
     GLfloat hp;

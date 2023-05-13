@@ -7,16 +7,23 @@
 
 #include "../Viztui.lib.h"
 
+extern const GLfloat bulletSize[2];
+extern const GLfloat bulletHalfSize[2];
+
 class Bullet {
-protected:
+private:
     GLfloat position[2] {0, 0};
     MOVE_DIRS dir;
     GLfloat angle;
     GLfloat speed;
     GLfloat damage;
+    GLboolean firedByPlayer;
+
+    GLvoid body();
+    GLvoid head();
 public:
-    Bullet(GLfloat x, GLfloat y, MOVE_DIRS dir);
-    Bullet();
+    Bullet(GLfloat x, GLfloat y, MOVE_DIRS dir, GLboolean firedByPlayer);
+    Bullet(GLboolean firedByPlayer);
     ~Bullet() = default;
 
     GLvoid setPosition(GLfloat x, GLfloat y);
@@ -25,11 +32,10 @@ public:
     GLvoid setDirection(MOVE_DIRS d);
     GLfloat* getPosition();
     GLfloat getDamage();
-    virtual GLboolean damagesPlayer();
+    GLboolean damagesPlayer();
     GLvoid move();
-
-    virtual GLvoid draw() = 0;
-    virtual Bullet* clone() = 0;
+    GLvoid draw();
+    Bullet* clone();
 };
 
 

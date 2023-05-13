@@ -6,15 +6,19 @@
 #define VIZTUI_PLAYERSHIP_H
 
 #include "../Viztui.lib.h"
-#include "../Bullet/PlayerBullet.h"
+#include "../Bullet/Bullet.h"
 
 const extern GLfloat playerShipSize[2];
 const extern GLfloat playerShipHalfSize[2];
 
 class PlayerShip {
 private:
+    const static GLfloat PRIMARY_COLOR[3];
+    const static GLfloat SECONDARY_COLOR[3];
+    const static GLfloat COCKPIT_COLOR[3];
+
     const static GLshort maxHp = 5;
-    PlayerBullet* bullet;
+    Bullet* bullet;
 
     GLint currentAngle = 0;
     GLfloat position[2]; // X and Y coords
@@ -35,18 +39,18 @@ public:
     ~PlayerShip() = default;
 
     GLvoid setFireExtra(GLboolean fExtra);
-    GLfloat* getPosition(GLvoid);
+    GLfloat* getPosition();
     GLshort getHp();
     static GLshort getMaxHp();
 
-    GLvoid draw(GLvoid);
+    GLvoid draw();
     GLboolean move(MOVE_DIRS dir);
     GLvoid receiveHp(GLshort hp);
     GLvoid increaseBulletDmg(GLfloat dmg);
     GLvoid takeDamage(GLshort dmg);
     GLboolean isAlive();
     GLvoid rotate(MOVE_DIRS rDir);
-    std::vector<PlayerBullet*> fireBullet();
+    std::vector<Bullet*> fireBullet();
 };
 
 

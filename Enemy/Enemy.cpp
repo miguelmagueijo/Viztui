@@ -4,6 +4,11 @@
 
 #include "Enemy.h"
 
+const GLfloat Enemy::PRIMARY_COLOR[3] = { 0.87f, 0.44f, 0.44f };
+const GLfloat Enemy::SPECIAL_PRIMARY_COLOR[3] = { 0.87f, 0.78f, 0.44f };
+const GLfloat Enemy::SECONDARY_COLOR[3] = { 0.29f, 0.31f, 0.76f };
+const GLfloat Enemy::COCKPIT_COLOR[3] = { 0.34f, 0.60f, 1.00f };
+
 Enemy::Enemy(GLfloat x, GLfloat y, GLfloat speed, GLfloat hp) {
     this->position[0] = x;
     this->position[1] = y;
