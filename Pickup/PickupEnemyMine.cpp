@@ -30,9 +30,9 @@ GLvoid PickupEnemyMine::plate() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, pickupHalfSize[1]);
-        glVertex2f(pickupSize[1] * 3 / 7, pickupHalfSize[1]);
-        glVertex2f(pickupSize[1] * 3 / 7, 0);
+        glVertex2f(0, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] * 2 / 5, pickupSize[1] * 3 / 7);
+        glVertex2f(pickupSize[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -46,7 +46,7 @@ GLvoid PickupEnemyMine::draw() {
 
     glPushMatrix();
 
-    glTranslatef(pickupSize[1] * 3 / 10, pickupSize[1] * 2 / 7, 0);
+    glTranslatef(pickupSize[0] * 3 / 10, pickupSize[1] * 2 / 7, 0);
     this->plate();
 
     glPopMatrix();
