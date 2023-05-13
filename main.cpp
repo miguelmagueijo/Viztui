@@ -38,7 +38,7 @@ GLboolean playerCanFire = true;
 GLboolean enemyCanFire = true;
 MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
-
+GLint waitingForRespawn = false;
 
 std::vector<HpHeart*> playerHpHeartsUI;
 
@@ -61,9 +61,9 @@ GLvoid setupLevels() {
     level1->enemySpeedIncremental = 0.1f;
     level1->occupiedPercentageX = 70;
     level1->numWaves = 1;
-    level1->enemyTypePerLine.push_back({ { 0, 0, 0 } });
-    level1->enemyHpPerWave.push_back({ { 20, 0, 0 } });
-    level1->pickupsPerWave.push_back({ { 0, 1, 0 } });
+    level1->enemyTypePerLine = { { 0, 0, 0 } };
+    level1->enemyHpPerWave = { { 20, 0, 0 } };
+    level1->pickupsPerWave = { { 0, 1, 0 } };
     level1->nextLevel = level2;
 
     // Level 2
@@ -73,7 +73,7 @@ GLvoid setupLevels() {
     level2->enemySpeedIncremental = 0.1f;
     level2->occupiedPercentageX = 70;
     level2->numWaves = 2;
-    level2->enemyTypePerLine = { { 1, 1, 2 }, { 1, 2, 2 } };
+    level2->enemyTypePerLine = { { 0, 0, 1 }, { 0, 1, 1 } };
     level2->enemyHpPerWave = { { 20, 30, 0 }, { 20, 30, 0 } };
     level2->pickupsPerWave = { { 1, 1, 0 }, { 1, 0, 0 } };
     level2->nextLevel = nullptr;
@@ -107,6 +107,9 @@ GLboolean isOutOfWorldBorders(const GLfloat* pos, const GLfloat* offset) {
 }
 
 GLvoid createEnemies() {
+    if (currWaveNum >= currentLevel->numWaves)
+        return;
+
     enemies.clear();
     GLint nLines = currentLevel->enemyTypePerLine.at(currWaveNum).size();
     GLint nCols = abs(worldBorders[1] - worldBorders[0]) * currentLevel->occupiedPercentageX / 100 / (enemySize[0] * 2);
@@ -137,7 +140,7 @@ GLvoid createEnemies() {
                     enemies.push_back( new EnemyMiner(x, y, enemyHpInfo.at(2)) );
                     break;
                 default:
-                    throw std::invalid_argument("Bad enemy type TODO");
+                    throw std::invalid_argument("Bad enemy type");
             }
         }
     }
@@ -161,7 +164,7 @@ GLvoid createEnemies() {
                     p = new PickupMoreDamage(5);
                     break;
                 default:
-                    throw std::invalid_argument("Bad pickup");
+                    throw std::invalid_argument("Bad pickup type");
             }
 
             // Set pickup direction and speed
@@ -185,6 +188,8 @@ GLvoid createEnemies() {
             if (breakLoop) break;
         }
     }
+
+    waitingForRespawn = false;
 }
 
 GLvoid createPlayerShip() {
@@ -197,9 +202,28 @@ GLvoid createPlayerShip() {
     std::cout << "[DEBUG] PlayerShip created" << std::endl;
 }
 
+GLvoid timerSpawnNewWave(int value) {
+    createEnemies();
+}
+
 GLvoid triggerGameOver() {
     gameState = GAME_STATE::GAMEOVER;
     frameTimerUp = false;
+}
+
+GLvoid triggerGameVictory() {
+    if (waitingForRespawn)
+        return;
+
+    if (!waitingForRespawn && currWaveNum < currentLevel->numWaves - 1) {
+        currWaveNum++;
+        waitingForRespawn = true;
+        glutTimerFunc(1500, timerSpawnNewWave, 0);
+        return;
+    }
+
+    gameState = GAME_STATE::PAUSED;
+    std::cout << "You won!" << std::endl;
 }
 
 GLvoid draw(GLvoid) {
@@ -250,6 +274,10 @@ GLvoid idle(GLvoid) {
         GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
         GLfloat *playerShipPosition = playerShip->getPosition();
 
+        if (enemies.empty() && !waitingForRespawn) {
+            triggerGameVictory();
+        }
+
         /**
          * Collisions
          */
@@ -299,19 +327,22 @@ GLvoid idle(GLvoid) {
 
                             if (!idxEnemiesThatFire.empty()) {
                                 GLint idxToRemove = -1;
+                                GLint c = -1;
+                                for (GLint idxEf = 0; idxEf < idxEnemiesThatFire.size(); idxEf++) {
+                                    GLint eIdx = idxEnemiesThatFire.at(idxEf);
 
-                                for (GLint & idxEf : idxEnemiesThatFire) {
-                                    if (idxEf < j)
+                                    if (eIdx < j)
                                         continue;
-                                    else if (idxEf == j)
-                                        idxToRemove = j;
+                                    else if (eIdx == j)
+                                        idxToRemove = idxEf;
                                     else
-                                        idxEf -= 1;
+                                        idxEnemiesThatFire[idxEf] -= 1;
                                 }
 
                                 if (idxToRemove >= 0) {
+                                    std::cout << "[DEBUG] Here" << std::endl;
                                     idxEnemiesThatFire.erase(idxEnemiesThatFire.begin() + idxToRemove);
-                                    std::cout << "Removed idx that fire" << std::endl;
+                                    std::cout << "[DEBUG] Removed idx that fire" << std::endl;
                                 }
                             }
 
@@ -431,10 +462,16 @@ GLvoid idle(GLvoid) {
         }
 
         // Enemy fire
-        if (enemyCanFire && !enemies.empty()) {
+        if (enemyCanFire && !idxEnemiesThatFire.empty()) {
             enemyCanFire = false;
 
+
             GLint idx = rand() % idxEnemiesThatFire.size();
+            std::cout << idx << " " << idxEnemiesThatFire.size() << std::endl;
+
+            for (int i = 0; i < idxEnemiesThatFire.size(); i++)
+                std::cout << idxEnemiesThatFire.at(i) << " ";
+            std::cout << std::endl;
 
             GLfloat* enemyPosition = enemies.at(idxEnemiesThatFire.at(idx))->getPosition();
 
