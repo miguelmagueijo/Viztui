@@ -240,7 +240,7 @@ GLvoid draw(GLvoid) {
     glLoadIdentity();
 
     // Set Projection Type - 2D orthogonal
-    gluOrtho2D(worldBorders[0], worldBorders[1], worldBorders[2], worldBorders[3]);
+    gluOrtho2D(worldBorders[0] * ASPECT_RATIO, worldBorders[1] * ASPECT_RATIO, worldBorders[2], worldBorders[3]);
 
     // Select modelview matrix
     glMatrixMode(GL_MODELVIEW);
@@ -327,7 +327,7 @@ GLvoid idle(GLvoid) {
 
                             if (!idxEnemiesThatFire.empty()) {
                                 GLint idxToRemove = -1;
-                                GLint c = -1;
+
                                 for (GLint idxEf = 0; idxEf < idxEnemiesThatFire.size(); idxEf++) {
                                     GLint eIdx = idxEnemiesThatFire.at(idxEf);
 
@@ -554,9 +554,25 @@ GLvoid gameTimer(GLint value) {
         glutTimerFunc(16, gameTimer, 0);
 }
 
+// On window resize also resizes world screen and keeps original aspect ratio
 GLvoid onWindowResize(int w, int h) {
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
+
+    // Base equation R = W / H
+    const float NEW_AR = float(w) / float(h);
+
+    if (NEW_AR < ASPECT_RATIO) { // mais altura que largura
+        const int NEW_HEIGHT = w / ASPECT_RATIO;
+        glViewport(0, (h - NEW_HEIGHT) / 2, w, NEW_HEIGHT);
+    } else if (NEW_AR > ASPECT_RATIO) { // mais largura que altura
+        const int NEW_WIDTH = h * ASPECT_RATIO;
+        glViewport((w - NEW_WIDTH) / 2, 0, NEW_WIDTH, h);
+    } else {
+        glViewport(0, 0, w, h);
+    }
+
+    glutPostRedisplay();
 }
 
 int main(int argc, char** argv) {
@@ -598,6 +614,8 @@ int main(int argc, char** argv) {
     // Set display callback
     //glutDisplayFunc(MainMenu::draw);
     glutDisplayFunc(draw);
+
+    glutReshapeFunc(onWindowResize);
 
     // Set keyboard callback
     //glutKeyboardFunc(MainMenu::keyboard);
