@@ -18,6 +18,8 @@ private:
     const static GLfloat SECONDARY_COLOR[3];
     const static GLfloat COCKPIT_COLOR[3];
 
+    const static GLfloat bulletSpace;
+
     const static GLshort maxHp = 5;
     Bullet* bullet;
 

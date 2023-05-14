@@ -9,9 +9,14 @@ const GLfloat playerShipSize[2] = { 30.0f, 22.5f };
 // Better use more memory than doing the division all the time it needs it
 const GLfloat playerShipHalfSize[2] = { playerShipSize[0] / 2, playerShipSize[1] / 2 };
 
+GLfloat playerHitbox[2] = { playerShipSize[0], playerShipSize[1] };
+GLfloat playerHalfHitbox[2] = { playerShipHalfSize[0], playerShipHalfSize[1] };
+
 const GLfloat PlayerShip::PRIMARY_COLOR[3] = { 0.78f, 0.61f, 0.19f };
 const GLfloat PlayerShip::SECONDARY_COLOR[3] = { 0.42f, 0.50f, 0.39f };
 const GLfloat PlayerShip::COCKPIT_COLOR[3] = { 0.34f, 0.60f, 1.00f };
+
+const GLfloat PlayerShip::bulletSpace = 2;
 
 PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->position[0] = x;
@@ -22,7 +27,7 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->bullet = new Bullet(true);
     this->bullet->setSpeed(3);
     this->bullet->setDamage(5);
-    this->canFireExtra = false;
+    this->canFireExtra = true;
     this->currentAngle = 0;
 }
 
@@ -46,8 +51,8 @@ GLvoid PlayerShip::body() {
     glColor3f(PlayerShip::PRIMARY_COLOR[0], PlayerShip::PRIMARY_COLOR[1], PlayerShip::PRIMARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(playerShipSize[0] / 4.0f, playerShipSize[1]);
+        glVertex2f(0, 0);
+        glVertex2f(playerShipSize[0] / 4, playerShipSize[1]);
         glVertex2f(playerShipHalfSize[0], 0);
     } glEnd();
 }
@@ -56,10 +61,10 @@ GLvoid PlayerShip::cockpit() {
     glColor3f(PlayerShip::COCKPIT_COLOR[0], PlayerShip::COCKPIT_COLOR[1], PlayerShip::COCKPIT_COLOR[2]);
 
     glBegin(GL_QUADS); {
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(playerShipSize[0] * 0.1f / 4.0f, playerShipSize[1] / 5.0f);
-        glVertex2f(playerShipSize[0] * 0.3f / 4.0f, playerShipSize[1] / 5.0f);
-        glVertex2f(playerShipSize[0] / 10.0f, 0.0f);
+        glVertex2f(0, 0);
+        glVertex2f(playerShipSize[0] * 1 / 40, playerShipSize[1] / 5);
+        glVertex2f(playerShipSize[0] * 3 / 40, playerShipSize[1] / 5);
+        glVertex2f(playerShipSize[0] / 10, 0.0f);
     } glEnd();
 }
 
@@ -67,7 +72,7 @@ GLvoid PlayerShip::leftWing() {
     glColor3f(PlayerShip::SECONDARY_COLOR[0], PlayerShip::SECONDARY_COLOR[1], PlayerShip::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(playerShipHalfSize[0], 0.0f);
+        glVertex2f(playerShipHalfSize[0], 0);
         glVertex2f(0, playerShipHalfSize[1]);
         glVertex2f(playerShipHalfSize[0], playerShipHalfSize[1]);
     } glEnd();
@@ -77,7 +82,7 @@ GLvoid PlayerShip::rightWing(GLvoid) {
     glColor3f(PlayerShip::SECONDARY_COLOR[0], PlayerShip::SECONDARY_COLOR[1], PlayerShip::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(0.0f, 0.0f);
+        glVertex2f(0, 0);
         glVertex2f(0, playerShipHalfSize[1]);
         glVertex2f(playerShipHalfSize[0], playerShipHalfSize[1]);
     } glEnd();
@@ -87,10 +92,10 @@ GLvoid PlayerShip::cannon(GLvoid) {
     glColor3f(PlayerShip::PRIMARY_COLOR[0], PlayerShip::PRIMARY_COLOR[1], PlayerShip::PRIMARY_COLOR[2]);
 
     glBegin(GL_QUADS); {
-        glVertex2f(0.0f, 0.0f);
-        glVertex2f(playerShipSize[0] * 0.1f / 4.0f, playerShipSize[1] / 10.0f);
-        glVertex2f(playerShipSize[0] * 0.3f / 4.0f, playerShipSize[1] / 10.0f);
-        glVertex2f(playerShipSize[0] / 10.0f, 0.0f);
+        glVertex2f(0, 0);
+        glVertex2f(playerShipSize[0] * 1 / 40, playerShipSize[1] / 10);
+        glVertex2f(playerShipSize[0] / 10, playerShipSize[1] / 10);
+        glVertex2f(playerShipSize[0] / 8, 0.0f);
     } glEnd();
 }
 
@@ -138,7 +143,7 @@ GLvoid PlayerShip::draw(GLvoid) {
     glPushMatrix();
 
     // Left cannon draw
-    glTranslatef(playerShipSize[0] * 9 / 40, playerShipHalfSize[1], 0.0f);
+    glTranslatef(playerShipSize[0] / 5, playerShipHalfSize[1], 0.0f);
     this->cannon();
 
     glPopMatrix();
@@ -157,25 +162,25 @@ GLboolean PlayerShip::move(MOVE_DIRS dir) {
 
     switch(dir) {
         case MOVE_DIRS::UP:
-            if (this->position[1] + playerShipHalfSize[1] + this->speed < worldBorders[3]) {
+            if (this->position[1] + playerHalfHitbox[1] + this->speed < worldBorders[3]) {
                 this->position[1] += this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::DOWN:
-            if (this->position[1] - playerShipHalfSize[1] - this->speed > worldBorders[2]) {
+            if (this->position[1] - playerHalfHitbox[1] - this->speed > worldBorders[2]) {
                 this->position[1] -= this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::LEFT:
-            if (this->position[0] - playerShipHalfSize[0] - this->speed > worldBorders[0]) {
+            if (this->position[0] - playerHalfHitbox[0] - this->speed > worldBorders[0]) {
                 this->position[0] -= this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::RIGHT:
-            if (this->position[0] + playerShipHalfSize[0] + this->speed < worldBorders[1]) {
+            if (this->position[0] + playerHalfHitbox[0] + this->speed < worldBorders[1]) {
                 this->position[0] += this->speed;
                 hasMoved = true;
             }
@@ -220,6 +225,25 @@ GLvoid PlayerShip::rotate(MOVE_DIRS rDir) {
             return;
     }
 
+    // Swap hitboxes values
+    GLfloat tmp = playerHitbox[0];
+    playerHitbox[0] = playerHitbox[1];
+    playerHitbox[1] = tmp;
+
+    tmp = playerHalfHitbox[0];
+    playerHalfHitbox[0] = playerHalfHitbox[1];
+    playerHalfHitbox[1] = tmp;
+
+    // Avoid ship clipping through borders
+    if (this->position[0] - playerHalfHitbox[0] < worldBorders[0])
+        this->position[0] += this->speed;
+    else if (this->position[0] + playerHalfHitbox[0] > worldBorders[1])
+        this->position[0] -= this->speed;
+    else if (this->position[1] - playerHalfHitbox[1] < worldBorders[2])
+        this->position[1] += this->speed;
+    else if (this->position[1] + playerHalfHitbox[1] > worldBorders[3])
+        this->position[1] -= this->speed;
+
     if (abs(this->currentAngle) >= 360) {
         this->currentAngle = 0;
     }
@@ -232,22 +256,22 @@ std::vector<Bullet*> PlayerShip::fireBullet() {
 
     switch (this->currentAngle) {
         case 0:
-            newBullet->setPosition(this->position[0], this->position[1] + playerShipHalfSize[1] + 2);
+            newBullet->setPosition(this->position[0], this->position[1] + playerHalfHitbox[1] + bulletHalfSize[1] + PlayerShip::bulletSpace);
             newBullet->setDirection(MOVE_DIRS::UP);
             break;
         case -90:
         case 270:
-            newBullet->setPosition(this->position[0] + playerShipHalfSize[0] + 2, this->position[1]);
+            newBullet->setPosition(this->position[0] + playerHalfHitbox[0] + bulletHalfSize[0] + PlayerShip::bulletSpace, this->position[1]);
             newBullet->setDirection(MOVE_DIRS::RIGHT);
             break;
         case -180:
         case 180:
-            newBullet->setPosition(this->position[0], this->position[1] - playerShipHalfSize[1] - 2);
+            newBullet->setPosition(this->position[0], this->position[1] - playerHalfHitbox[1] - bulletHalfSize[1] - PlayerShip::bulletSpace);
             newBullet->setDirection(MOVE_DIRS::DOWN);
             break;
         case -270:
         case 90:
-            newBullet->setPosition(this->position[0] - playerShipHalfSize[1] - 2, this->position[1]);
+            newBullet->setPosition(this->position[0] - playerHalfHitbox[0] - bulletHalfSize[0] - PlayerShip::bulletSpace, this->position[1]);
             newBullet->setDirection(MOVE_DIRS::LEFT);
             break;
     }
@@ -261,31 +285,45 @@ std::vector<Bullet*> PlayerShip::fireBullet() {
         leftBullet->setDamage(this->bulletDmg / 2);
         rightBullet->setDamage(this->bulletDmg / 2);
 
+        GLfloat xOffset, yOffset;
+
         switch (this->currentAngle) {
             case 0:
-                leftBullet->setPosition(this->position[0] - playerShipSize[0] * 9 / 40, this->position[1] + playerShipSize[1] * 2 / 15);
-                rightBullet->setPosition(this->position[0] + playerShipSize[0] * 9 / 40, this->position[1] + playerShipSize[1] * 2 / 15);
+                xOffset = playerHitbox[0] * 9.5f / 40;
+                yOffset = playerHitbox[1] / 10 + bulletHalfSize[1] + bulletSpace;
+
+                leftBullet->setPosition(this->position[0] - xOffset, this->position[1] + yOffset);
+                rightBullet->setPosition(this->position[0] + xOffset, this->position[1] + yOffset);
                 leftBullet->setDirection(MOVE_DIRS::UP);
                 rightBullet->setDirection(MOVE_DIRS::UP);
                 break;
             case -90:
             case 270:
-                leftBullet->setPosition(this->position[0] + playerShipSize[1] * 2 / 15, this->position[1] + playerShipSize[0] * 9 / 40);
-                rightBullet->setPosition(this->position[0] + playerShipSize[1] * 2 / 15, this->position[1] - playerShipSize[0] * 9 / 40);
+                xOffset = playerHitbox[0] / 10 + bulletHalfSize[1] + bulletSpace;
+                yOffset = playerHitbox[1] * 9.5f / 40;
+
+                leftBullet->setPosition(this->position[0] + xOffset, this->position[1] + yOffset);
+                rightBullet->setPosition(this->position[0] + xOffset, this->position[1] - yOffset);
                 leftBullet->setDirection(MOVE_DIRS::RIGHT);
                 rightBullet->setDirection(MOVE_DIRS::RIGHT);
                 break;
             case -180:
             case 180:
-                leftBullet->setPosition(this->position[0] + playerShipSize[0] * 9 / 40, this->position[1] - playerShipSize[1] * 2 / 15);
-                rightBullet->setPosition(this->position[0] - playerShipSize[0] * 9 / 40, this->position[1] - playerShipSize[1] * 2 / 15);
+                xOffset = playerHitbox[0] * 9.5f / 40;
+                yOffset = playerHitbox[1] / 10 + bulletHalfSize[1] + bulletSpace;
+
+                leftBullet->setPosition(this->position[0] + xOffset, this->position[1] - yOffset);
+                rightBullet->setPosition(this->position[0] - xOffset, this->position[1] - yOffset);
                 leftBullet->setDirection(MOVE_DIRS::DOWN);
                 rightBullet->setDirection(MOVE_DIRS::DOWN);
                 break;
             case -270:
             case 90:
-                leftBullet->setPosition(this->position[0] - playerShipSize[1] * 2 / 15, this->position[1] - playerShipSize[0] * 9 / 40);
-                rightBullet->setPosition(this->position[0] - playerShipSize[1] * 2 / 15, this->position[1] + playerShipSize[0] * 9 / 40);
+                xOffset = playerHitbox[0] / 10 + bulletHalfSize[1] + bulletSpace;
+                yOffset = playerHitbox[1] * 9.5f / 40;
+
+                leftBullet->setPosition(this->position[0] - xOffset, this->position[1] - yOffset);
+                rightBullet->setPosition(this->position[0] - xOffset, this->position[1] + yOffset);
                 leftBullet->setDirection(MOVE_DIRS::LEFT);
                 rightBullet->setDirection(MOVE_DIRS::LEFT);
                 break;

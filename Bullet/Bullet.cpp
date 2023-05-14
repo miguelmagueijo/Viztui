@@ -116,7 +116,7 @@ GLvoid Bullet::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - 1.0f, this->position[1] - 2.5f, 0.0f);
+    glTranslatef(this->position[0] - bulletHalfSize[0], this->position[1] - bulletHalfSize[1], 0.0f);
 
     glTranslatef(bulletHalfSize[0], bulletHalfSize[1], 0);
     glRotatef(this->angle, 0, 0, 1);
@@ -126,7 +126,7 @@ GLvoid Bullet::draw() {
 
     glPushMatrix();
 
-    glTranslatef(0.0f, 3.0f, 0.0f);
+    glTranslatef(0.0f, bulletSize[1] * 3 / 5, 0.0f);
     this->head();
 
     glPopMatrix();
