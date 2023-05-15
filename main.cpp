@@ -651,17 +651,17 @@ int main(int argc, char** argv) {
 
     // Set display callback
     //glutDisplayFunc(MainMenu::draw);
-    glutDisplayFunc(draw);
+    glutDisplayFunc(MainMenu::draw);
 
     glutReshapeFunc(onWindowResize);
 
     // Set keyboard callback
     //glutKeyboardFunc(MainMenu::keyboard);
-    glutKeyboardFunc(keyboard);
+    glutKeyboardFunc(MainMenu::keyboard);
 
     // Set idle function
     //glutIdleFunc(MainMenu::idle);
-    glutIdleFunc(idle);
+    glutIdleFunc(MainMenu::idle);
 
     glutTimerFunc(16, gameTimer, 0);
 
