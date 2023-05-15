@@ -4,15 +4,12 @@
 #include "./Enemy/EnemyBasic.h"
 #include "Bullet/Bullet.h"
 #include "Enemy/EnemyFire.h"
-#include "Menu/MainMenu.h"
 #include "UiElements/HpHeart.h"
 #include "Enemy/EnemyMiner.h"
 #include "Pickup/PickupMoreHp.h"
 #include "Pickup/PickupMoreDamage.h"
 #include "Pickup/PickupTwoBullets.h"
-#include <cstdlib>
-#include <ctime>
-#include <sstream>
+#include "./Menu/MenuController.h"
 
 /**
  * Global constants are named in UPPERCASE
@@ -38,7 +35,7 @@ GLboolean needsDraw = false;
 GLboolean areEnemiesMovingLeft = false;
 GLboolean playerCanFire = true;
 GLboolean playerCanRotate = true;
-GLboolean enemyCanFire = true;
+GLboolean enemyCanFire = false;
 MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
 GLint waitingForRespawn = false;
@@ -657,24 +654,24 @@ int main(int argc, char** argv) {
     setupLevels();
     currLvlInfo = level2;
 
-    createEnemies();
-    createPlayerShip();
+    //createEnemies();
+    //createPlayerShip();
+
+    openMainMenu();
 
     // Set display callback
-    glutDisplayFunc(draw);
-    //glutDisplayFunc(MainMenu::draw);
+    //glutDisplayFunc(draw);
 
     glutReshapeFunc(onWindowResize);
 
     // Set keyboard callback
-    glutKeyboardFunc(keyboard);
-    //glutKeyboardFunc(MainMenu::keyboard);
+    //glutKeyboardFunc(keyboard);
 
     // Set idle function
-    glutIdleFunc(idle);
-    //glutIdleFunc(MainMenu::idle);
+    //glutIdleFunc(idle);
 
-    glutTimerFunc(16, gameTimer, 0);
+    //glutTimerFunc(16, gameTimer, 0);
+    //glutTimerFunc(1000, enemyFireTimer, 0);
 
     // run main loop
     glutMainLoop();

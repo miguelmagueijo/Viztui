@@ -9,9 +9,12 @@
 // C++ Libraries
 #include <iostream>
 #include <vector>
+#include <cstdlib>
+#include <ctime>
+#include <sstream>
 
 // Freeglut / OpenGL imports that depend on Operating System
-// Support only for Windows and macOS
+// Supports only for Windows and macOS
 #if defined(_WIN32) || defined(_WIN64)
 #include <GL/freeglut.h>
 #elif defined(__APPLE__) || defined(__MACH__) || defined(TARGET_OS_MAC)
