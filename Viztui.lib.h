@@ -19,26 +19,33 @@
     #include <GLUT/glut.h>
 #endif
 
-extern GLint windowSize[2];
-extern GLfloat halfWindowSize[2];
-extern GLfloat worldBorders[4];
-extern GLfloat enemySize[2];
-extern GLfloat enemyHalfSize[2];
+const extern GLfloat WORLD_BORDERS[4];
 
 enum class MOVE_DIRS { UP, DOWN, LEFT, RIGHT };
 enum class GAME_STATE { PLAYING, PAUSED, GAMEOVER };
 
 typedef struct levelinfo {
-    GLint occupiedPercentageX;
-    GLint enemyBorderHitMax;
-    GLfloat enemySpeed;
-    GLfloat enemySpeedDown;
+    // Enemies X space to occupy in world (value between 0-1)
+    GLfloat xPerToOcupy;
+    // Enemies X space between enemies
+    GLfloat enemySpaceX;
+    // Enemy max hits on border before moving down
+    GLint enemyHitsToDown;
+    // Enemy speed move speed when moving in X axis and Y axis
+    GLfloat enemySpeed[2];
+    // Speed to increment each time enemies move down
+    GLfloat enemySpeedIncrement[2];
+    // Pickup speed when enemy drops it
     GLfloat pickupSpeed;
-    GLfloat enemySpeedIncremental; // increments speed for each moves down
-    GLint numWaves; // also the size of the next 3 vectors
-    std::vector<std::vector<GLint>> enemyTypePerLine; // 0 -> Basic, 1 -> Fire, 2 -> Miner
-    std::vector<std::vector<GLfloat>> enemyHpPerWave; // hp of 0 -> basic, 1 -> fire, 2 -> miner
-    std::vector<std::vector<GLint>> pickupsPerWave; // idx corresponds to 0 -> MoreHp, 1 -> TwoBullets, 3 -> MoreDamage
+    // Number of enemy waves in the level and the size of the next 3 vectors
+    GLint numWaves;
+    // Enemy to be placed in each line, 0 -> basic, 1 -> fire, 2 -> miner
+    std::vector<std::vector<GLint>> enemyTypePerLine;
+    // Hp of each enemy per wave, 0 -> basic, 1 -> fire, 2 -> miner
+    std::vector<std::vector<GLfloat>> enemyHpPerWave;
+    // Number of pickups per wave, 0 -> MoreHp, 1 -> TwoBullets, 3 -> MoreDamage
+    std::vector<std::vector<GLint>> pickupsPerWave;
+    // Pointer to the next level, nullptr and it's the last level
     struct levelinfo* nextLevel;
 } levelinfo;
 

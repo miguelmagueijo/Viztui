@@ -13,9 +13,9 @@ GLvoid EnemyMiner::body() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] / 2);
-        glVertex2f(enemySize[0] * 2 / 5, enemySize[1] / 2);
-        glVertex2f(enemySize[0] * 2 / 5, 0);
+        glVertex2f(0, Enemy::SIZE[1] / 2);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, Enemy::SIZE[1] / 2);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -24,9 +24,9 @@ GLvoid EnemyMiner::cockpit() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] * 3 / 10);
-        glVertex2f(enemySize[0] / 10, enemySize[1] * 3 / 10);
-        glVertex2f(enemySize[0] / 10, 0);
+        glVertex2f(0, Enemy::SIZE[1] * 3 / 10);
+        glVertex2f(Enemy::SIZE[0] / 10, Enemy::SIZE[1] * 3 / 10);
+        glVertex2f(Enemy::SIZE[0] / 10, 0);
     } glEnd();
 }
 
@@ -35,9 +35,9 @@ GLvoid EnemyMiner::wing() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1]);
-        glVertex2f(enemySize[0] * 3 / 10, enemySize[1]);
-        glVertex2f(enemySize[0] * 3 / 10, 0);
+        glVertex2f(0, Enemy::SIZE[1]);
+        glVertex2f(Enemy::SIZE[0] * 3 / 10, Enemy::SIZE[1]);
+        glVertex2f(Enemy::SIZE[0] * 3 / 10, 0);
     } glEnd();
 }
 
@@ -46,9 +46,9 @@ GLvoid EnemyMiner::mine() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] * 2 / 5);
-        glVertex2f(enemySize[0] * 2 / 5, enemySize[1] * 2 / 5);
-        glVertex2f(enemySize[0] * 2 / 5, 0);
+        glVertex2f(0, Enemy::SIZE[1] * 2 / 5);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, Enemy::SIZE[1] * 2 / 5);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -56,28 +56,28 @@ GLvoid EnemyMiner::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - enemySize[0] / 2, this->position[1] - enemySize[1] / 2, 0);
+    glTranslatef(this->position[0] - Enemy::HALF_SIZE[0], this->position[1] - Enemy::HALF_SIZE[1], 0);
 
     this->wing(); // draws left wing
 
     glPushMatrix(); // Save translation matrix;
 
-    glTranslatef(enemySize[0] * 3 / 10, 0, 0);
+    glTranslatef(Enemy::SIZE[0] * 3 / 10, 0, 0);
     this->body();
 
-    glTranslatef(0, enemySize[1] * 3 / 5, 0);
+    glTranslatef(0, Enemy::SIZE[1] * 3 / 5, 0);
     this->mine();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(enemySize[0] * 9 / 20, enemySize[1] / 10, 0);
+    glTranslatef(Enemy::SIZE[0] * 9 / 20, Enemy::SIZE[1] / 10, 0);
     this->cockpit();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(enemySize[0] * 7 / 10, 0, 0);
+    glTranslatef(Enemy::SIZE[0] * 7 / 10, 0, 0);
     this->wing(); // draw right wing
 
     glPopMatrix();

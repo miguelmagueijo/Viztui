@@ -14,22 +14,23 @@
 #include <ctime>
 #include <sstream>
 
+/**
+ * Global constants are named in UPPERCASE
+ * Local constants are named in camelCase
+ * Global and Local variables are named in camelCase
+ */
 
-const GLint MAX_ENEMY_COUNT_DOWN = 3;
+// Window size [Width, Height] and Aspect Ratio
+const GLint INITIAL_WINDOW_SIZE[2] = { 720, 720 };
+const GLfloat INITIAL_AR = GLfloat(INITIAL_WINDOW_SIZE[0]) / GLfloat(INITIAL_WINDOW_SIZE[1]);
 
-// Window size [Width, Height]
-GLint windowSize[2] = { 850, 850 };
-const GLfloat ASPECT_RATIO = windowSize[0] / windowSize[1];
-GLfloat halfWindowSize[2] = { static_cast<GLfloat>(windowSize[0] / 2), static_cast<GLfloat>(windowSize[1] / 2) };
 // World Borders by order Left, Right, Bottom, Up
-GLfloat worldBorders[4] = { -125, 125, -125, 125 };
-const GLfloat offsetWBLines = 0.002f; // offset to draw world borders lines
+const GLfloat WORLD_BORDERS[4] = {-125, 125, -125, 125 };
+// World distance X axis (idx: 0) and Y axis (idx: 1)
+const GLfloat WORLD_DISTANCE[2] = { abs(WORLD_BORDERS[1] - WORLD_BORDERS[0]), abs(WORLD_BORDERS[3] - WORLD_BORDERS[2]) };
+const GLfloat OFFSET_WB_LINES = 0.002f; // space offset to draw world borders lines while playing
 
-// Sizes
-GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
-GLfloat enemyHalfSize[2] = { enemySize[0] / 2, enemySize[1] / 2 };
-
-struct levelinfo* currentLevel;
+struct levelinfo* currLvlInfo;
 GAME_STATE gameState = GAME_STATE::PLAYING;
 GLint currWaveNum = 0;
 GLboolean frameTimerUp = false;
@@ -57,11 +58,14 @@ struct levelinfo* level2 = new struct levelinfo;
 
 GLvoid setupLevels() {
     // Level 1
-    level1->enemyBorderHitMax = 3;
-    level1->enemySpeed = 1;
+    level1->enemySpaceX = Enemy::SIZE[0] * 1.25f;
+    level1->enemyHitsToDown = 3;
+    level1->enemySpeed[0] = 1;
+    level1->enemySpeed[1] = 3;
+    level1->enemySpeedIncrement[0] = 0.1f;
+    level1->enemySpeedIncrement[0] = 0;
+    level1->xPerToOcupy = 0.7f;
     level1->pickupSpeed = 1;
-    level1->enemySpeedIncremental = 0.1f;
-    level1->occupiedPercentageX = 70;
     level1->numWaves = 1;
     level1->enemyTypePerLine = { { 0, 0, 0 } };
     level1->enemyHpPerWave = { { 20, 0, 0 } };
@@ -69,11 +73,14 @@ GLvoid setupLevels() {
     level1->nextLevel = level2;
 
     // Level 2
-    level2->enemyBorderHitMax = 3;
-    level2->enemySpeed = 1.10f;
+    level2->enemySpaceX = Enemy::SIZE[0] * 1.25f;
+    level2->enemyHitsToDown = 3;
+    level2->enemySpeed[0] = 1.10f;
+    level2->enemySpeed[1] = 3;
     level2->pickupSpeed = 1.25f;
-    level2->enemySpeedIncremental = 0.1f;
-    level2->occupiedPercentageX = 90;
+    level2->enemySpeedIncrement[0] = 0.1f;
+    level2->enemySpeedIncrement[1] = 0;
+    level2->xPerToOcupy = 0.8f;
     level2->numWaves = 2;
     level2->enemyTypePerLine = { { 0, 0, 1 }, { 0, 1, 1 } };
     level2->enemyHpPerWave = { { 20, 30, 0 }, { 20, 30, 0 } };
@@ -96,7 +103,7 @@ GLvoid playerRotateTimer(GLint value) {
     playerCanRotate = true;
 }
 
-// Checks if object 1 (pos1, offset1) colliding with object 2 (pos2, offset2)
+// Checks if object 1 (pos1, offset1) is colliding with object 2 (pos2, offset2)
 GLboolean collissionBetween(const GLfloat* pos1, const GLfloat* offset1, const GLfloat* pos2, const GLfloat* offset2) {
     return !(pos1[1] - offset1[1] >= pos2[1] + offset2[1] || // Object 1 MIN Y >= Object 2 MAX Y
              pos1[1] + offset1[1] <= pos2[1] - offset2[1] || // Object 1 MAX Y <= Object 2 MIN Y
@@ -104,33 +111,35 @@ GLboolean collissionBetween(const GLfloat* pos1, const GLfloat* offset1, const G
              pos1[0] + offset1[0] <= pos2[0] - offset2[0]);  // Object 1 MAX X <= Object 2 MIN X
 }
 
-// Checks if object is fully out of any world border (TOP, BOTTOM, RIGHT, LEFT)
+// Checks if object (pos, offset) is fully out of any world border (TOP, BOTTOM, RIGHT, LEFT)
 GLboolean isOutOfWorldBorders(const GLfloat* pos, const GLfloat* offset) {
-    return pos[1] - offset[1] > worldBorders[3] || // check top border
-           pos[1] + offset[1] < worldBorders[2] || // check bottom border
-           pos[0] - offset[0] > worldBorders[1] || // check right border
-           pos[0] + offset[0] < worldBorders[0];   // check left border
+    return pos[1] - offset[1] > WORLD_BORDERS[3] || // check top border
+           pos[1] + offset[1] < WORLD_BORDERS[2] || // check bottom border
+           pos[0] - offset[0] > WORLD_BORDERS[1] || // check right border
+           pos[0] + offset[0] < WORLD_BORDERS[0];   // check left border
 }
 
 GLvoid createEnemies() {
-    if (currWaveNum >= currentLevel->numWaves)
+    // Avoids problems if calling enemies without remaining waves
+    if (currWaveNum >= currLvlInfo->numWaves)
         return;
 
     enemies.clear();
-    GLint nLines = currentLevel->enemyTypePerLine.at(currWaveNum).size();
-    GLint nCols = abs(worldBorders[1] - worldBorders[0]) * currentLevel->occupiedPercentageX / 100 / (enemySize[0] * 2);
+
+    GLfloat enemySpace[2] = { Enemy::SIZE[0] * 2.0f, Enemy::SIZE[1] * 2.0f };
+    GLint nLines = currLvlInfo->enemyTypePerLine.at(currWaveNum).size();
+    GLint nCols = WORLD_DISTANCE[0] * currLvlInfo->xPerToOcupy / enemySpace[0];
     std::vector<GLint> idxEnemiesCanDrop; // enemies indexes that can drop pickups
-    //nCols -= nCols / 5 + 1;
 
     for (GLint i = 0; i < nLines; i++) {
-        GLint enemyType = currentLevel->enemyTypePerLine.at(currWaveNum).at(i);
+        const GLint enemyType = currLvlInfo->enemyTypePerLine.at(currWaveNum).at(i);
 
         for (GLint j = 0; j < nCols; j++) {
             // (Ponto inicial ± halfSize) ± ( (size * 2) * col|line)
-            GLfloat x = worldBorders[0] + 0.3f + enemySize[0] / 2 + enemySize[0] * 2 * j;
-            GLfloat y = worldBorders[3]  - 0.3f - enemySize[1] / 2 - enemySize[1] * 2 * i;
+            const GLfloat x = WORLD_BORDERS[0] + 0.3f + Enemy::HALF_SIZE[0] / 2 + enemySpace[0] * j;
+            const GLfloat y = WORLD_BORDERS[3] - 0.3f - Enemy::HALF_SIZE[1] / 2 - enemySpace[1] * i;
             GLint idx = enemies.size();
-            std::vector<GLfloat> enemyHpInfo = currentLevel->enemyHpPerWave.at(currWaveNum);
+            std::vector<GLfloat> enemyHpInfo = currLvlInfo->enemyHpPerWave.at(currWaveNum);
 
             switch(enemyType) {
                 case 0:
@@ -152,7 +161,7 @@ GLvoid createEnemies() {
     }
 
     if (!idxEnemiesCanDrop.empty()) {
-        std::vector<GLint> currPickupsWave = currentLevel->pickupsPerWave.at(currWaveNum);
+        std::vector<GLint> currPickupsWave = currLvlInfo->pickupsPerWave.at(currWaveNum);
 
         for (GLint i = 0; i < currPickupsWave.size(); i++) {
             GLboolean breakLoop = false;
@@ -175,7 +184,7 @@ GLvoid createEnemies() {
 
             // Set pickup direction and speed
             p->setDirection(MOVE_DIRS::DOWN);
-            p->setSpeed(currentLevel->pickupSpeed);
+            p->setSpeed(currLvlInfo->pickupSpeed);
 
             for (GLint j = 0; j < num; j++) {
                 if (idxEnemiesCanDrop.empty()) {
@@ -200,8 +209,8 @@ GLvoid createEnemies() {
 
 GLvoid createPlayerShip() {
     playerShip = new PlayerShip(
-                (worldBorders[0] + abs(worldBorders[1] - worldBorders[0]) / 2),
-                ( worldBorders[2] + playerShipSize[1] / 2 ) + 5,
+                (WORLD_BORDERS[0] + abs(WORLD_BORDERS[1] - WORLD_BORDERS[0]) / 2),
+                (WORLD_BORDERS[2] + playerShipSize[1] / 2 ) + 5,
                 4,
                 3
             );
@@ -221,7 +230,7 @@ GLvoid triggerGameVictory() {
     if (waitingForRespawn)
         return;
 
-    if (!waitingForRespawn && currWaveNum < currentLevel->numWaves - 1) {
+    if (!waitingForRespawn && currWaveNum < currLvlInfo->numWaves - 1) {
         currWaveNum++;
         waitingForRespawn = true;
         glutTimerFunc(1500, timerSpawnNewWave, 0);
@@ -237,20 +246,20 @@ GLvoid drawWorldBorders() {
 
     glBegin(GL_LINES); {
         // Left Border
-        glVertex2f(worldBorders[0] + offsetWBLines, worldBorders[2]);
-        glVertex2f(worldBorders[0] + offsetWBLines, worldBorders[3]);
+        glVertex2f(WORLD_BORDERS[0] + OFFSET_WB_LINES, WORLD_BORDERS[2]);
+        glVertex2f(WORLD_BORDERS[0] + OFFSET_WB_LINES, WORLD_BORDERS[3]);
 
         // Right Border
-        glVertex2f(worldBorders[1] - offsetWBLines, worldBorders[2]);
-        glVertex2f(worldBorders[1] - offsetWBLines, worldBorders[3]);
+        glVertex2f(WORLD_BORDERS[1] - OFFSET_WB_LINES, WORLD_BORDERS[2]);
+        glVertex2f(WORLD_BORDERS[1] - OFFSET_WB_LINES, WORLD_BORDERS[3]);
 
         // Bottom Border
-        glVertex2f(worldBorders[0], worldBorders[2] + offsetWBLines);
-        glVertex2f(worldBorders[1], worldBorders[2] + offsetWBLines);
+        glVertex2f(WORLD_BORDERS[0], WORLD_BORDERS[2] + OFFSET_WB_LINES);
+        glVertex2f(WORLD_BORDERS[1], WORLD_BORDERS[2] + OFFSET_WB_LINES);
 
         // Top Border
-        glVertex2f(worldBorders[0], worldBorders[3] - offsetWBLines);
-        glVertex2f(worldBorders[1], worldBorders[3] - offsetWBLines);
+        glVertex2f(WORLD_BORDERS[0], WORLD_BORDERS[3] - OFFSET_WB_LINES);
+        glVertex2f(WORLD_BORDERS[1], WORLD_BORDERS[3] - OFFSET_WB_LINES);
     } glEnd();
 }
 
@@ -268,7 +277,7 @@ GLvoid draw(GLvoid) {
     glLoadIdentity();
 
     // Set Projection Type - 2D orthogonal
-    gluOrtho2D(worldBorders[0] * ASPECT_RATIO, worldBorders[1] * ASPECT_RATIO, worldBorders[2], worldBorders[3]);
+    gluOrtho2D(WORLD_BORDERS[0] * INITIAL_AR, WORLD_BORDERS[1] * INITIAL_AR, WORLD_BORDERS[2], WORLD_BORDERS[3]);
 
     // Select modelview matrix
     glMatrixMode(GL_MODELVIEW);
@@ -301,7 +310,7 @@ GLvoid draw(GLvoid) {
 
 GLvoid idle(GLvoid) {
     if (frameTimerUp) {
-        GLfloat enemyHitbox[4] = {worldBorders[1], worldBorders[0], worldBorders[3], worldBorders[2]};
+        GLfloat enemyHitbox[4] = {WORLD_BORDERS[1], WORLD_BORDERS[0], WORLD_BORDERS[3], WORLD_BORDERS[2]};
         GLfloat *playerShipPosition = playerShip->getPosition();
 
         if (enemies.empty() && !waitingForRespawn) {
@@ -337,7 +346,7 @@ GLvoid idle(GLvoid) {
                     Enemy* e = enemies.at(j);
                     GLfloat* enemyPosition = e->getPosition();
 
-                    if (collissionBetween(enemyPosition, enemyHalfSize,
+                    if (collissionBetween(enemyPosition, Enemy::HALF_SIZE,
                                           bulletPosition, bulletHalfSize)) {
                         std::cout << "[DEBUG] Collision between bullet (idx "<< i <<
                                   ") with enemy (idx "<< j <<") and applied "<< b->getDamage() <<" dmg" << std::endl;
@@ -428,19 +437,19 @@ GLvoid idle(GLvoid) {
         for (Enemy* e : enemies) {
             GLfloat * enemyPosition = e->getPosition();
 
-            if (enemyPosition[0] - enemyHalfSize[0] < enemyHitbox[0])
-                enemyHitbox[0] = enemyPosition[0] - enemyHalfSize[0];
+            if (enemyPosition[0] - Enemy::HALF_SIZE[0] < enemyHitbox[0])
+                enemyHitbox[0] = enemyPosition[0] - Enemy::HALF_SIZE[0];
 
-            if (enemyPosition[0] + enemyHalfSize[0] > enemyHitbox[1])
-                enemyHitbox[1] = enemyPosition[0] + enemyHalfSize[0];
+            if (enemyPosition[0] + Enemy::HALF_SIZE[0] > enemyHitbox[1])
+                enemyHitbox[1] = enemyPosition[0] + Enemy::HALF_SIZE[0];
 
-            if (enemyPosition[1] - enemyHalfSize[1] < enemyHitbox[2])
-                enemyHitbox[2] = enemyPosition[1] - enemyHalfSize[1];
+            if (enemyPosition[1] - Enemy::HALF_SIZE[1] < enemyHitbox[2])
+                enemyHitbox[2] = enemyPosition[1] - Enemy::HALF_SIZE[1];
 
-            if (enemyPosition[1] - enemyHalfSize[1] > enemyHitbox[3])
-                enemyHitbox[3] = enemyPosition[1] + enemyHalfSize[1];
+            if (enemyPosition[1] - Enemy::HALF_SIZE[1] > enemyHitbox[3])
+                enemyHitbox[3] = enemyPosition[1] + Enemy::HALF_SIZE[1];
 
-            if (collissionBetween(enemyPosition, enemyHalfSize,
+            if (collissionBetween(enemyPosition, Enemy::HALF_SIZE,
                                   playerShipPosition, playerShipHalfSize)
             ) { // inimigo max x < player min x
                 std::cout << "[DEBUG] Collision between player and enemy" << std::endl;
@@ -450,11 +459,11 @@ GLvoid idle(GLvoid) {
         }
 
         // Collision with X borders
-        if ( (!areEnemiesMovingLeft && enemyHitbox[1] + 2 > worldBorders[1]) ||
-                (areEnemiesMovingLeft && enemyHitbox[0] - 2 < worldBorders[0]) ) {
+        if ((!areEnemiesMovingLeft && enemyHitbox[1] + 2 > WORLD_BORDERS[1]) ||
+            (areEnemiesMovingLeft && enemyHitbox[0] - 2 < WORLD_BORDERS[0]) ) {
             currEnemyCountDown++;
             areEnemiesMovingLeft = !areEnemiesMovingLeft;
-        } else if (enemyHitbox[2] <= worldBorders[2]) { // if enemies collide with bottom border
+        } else if (enemyHitbox[2] <= WORLD_BORDERS[2]) { // if enemies collide with bottom border
             triggerGameOver();
             return;
         }
@@ -477,14 +486,14 @@ GLvoid idle(GLvoid) {
         }
 
         // Enemies movements
-        GLfloat enemySpeed = currentLevel->enemySpeed;
-        if (currEnemyCountDown == MAX_ENEMY_COUNT_DOWN) {
+        GLfloat enemySpeed = currLvlInfo->enemySpeed[0];
+        if (currEnemyCountDown == currLvlInfo->enemyHitsToDown) {
             enemyMoveDir = MOVE_DIRS::DOWN;
             enemySpeed = enemySpeed * 2;
             currEnemyCountDown = 0;
         } else {
             enemyMoveDir = areEnemiesMovingLeft ? MOVE_DIRS::LEFT : MOVE_DIRS::RIGHT;
-            enemySpeed = currentLevel->enemySpeed;
+            enemySpeed = currLvlInfo->enemySpeed[0];
         }
 
         for (Enemy* e : enemies) {
@@ -507,7 +516,7 @@ GLvoid idle(GLvoid) {
 
             Bullet* b = new Bullet(
                                     enemyPosition[0],
-                                    enemyPosition[1] - enemyHalfSize[1] - 3,
+                                    enemyPosition[1] - Enemy::HALF_SIZE[1] - 3,
                                     MOVE_DIRS::DOWN,
                                     false
                                 );
@@ -600,11 +609,11 @@ GLvoid onWindowResize(int w, int h) {
     // Base equation R = W / H
     const float NEW_AR = float(w) / float(h);
 
-    if (NEW_AR < ASPECT_RATIO) { // mais altura que largura
-        const int NEW_HEIGHT = w / ASPECT_RATIO;
+    if (NEW_AR < INITIAL_AR) { // mais altura que largura
+        const int NEW_HEIGHT = w / INITIAL_AR;
         glViewport(0, (h - NEW_HEIGHT) / 2, w, NEW_HEIGHT);
-    } else if (NEW_AR > ASPECT_RATIO) { // mais largura que altura
-        const int NEW_WIDTH = h * ASPECT_RATIO;
+    } else if (NEW_AR > INITIAL_AR) { // mais largura que altura
+        const int NEW_WIDTH = h * INITIAL_AR;
         glViewport((w - NEW_WIDTH) / 2, 0, NEW_WIDTH, h);
     } else {
         glViewport(0, 0, w, h);
@@ -617,8 +626,8 @@ int main(int argc, char** argv) {
     srand(time(nullptr)); // seed random generator
 
     GLfloat initialHeartsPosition[2] = {
-                                        worldBorders[0] + HpHeart::hpHeartSize[0] + 2,
-                                        worldBorders[2] + HpHeart::hpHeartSize[1] + 2
+            WORLD_BORDERS[0] + HpHeart::hpHeartSize[0] + 2,
+            WORLD_BORDERS[2] + HpHeart::hpHeartSize[1] + 2
                                     };
     GLfloat spaceXHearts = 2;
     for (GLshort i = 0; i < PlayerShip::getMaxHp(); i++) {
@@ -634,34 +643,36 @@ int main(int argc, char** argv) {
     // Define Display Mode
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 
-    // Set window initial position
-    glutInitWindowPosition(20, 20);
+    // Set window position in the center of screen
+    const GLint screenWidth = glutGet(GLUT_SCREEN_WIDTH);
+    const GLint screenHeight = glutGet(GLUT_SCREEN_HEIGHT);
+    glutInitWindowPosition(screenWidth / 2 - INITIAL_WINDOW_SIZE[0] / 2, screenHeight / 2 - INITIAL_WINDOW_SIZE[1] / 2);
 
     // Set window size
-    glutInitWindowSize(windowSize[0], windowSize[1]);
+    glutInitWindowSize(INITIAL_WINDOW_SIZE[0], INITIAL_WINDOW_SIZE[1]);
 
     // Create window and set title
     glutCreateWindow("Viztui - The Space War");
 
     setupLevels();
-    currentLevel = level2;
+    currLvlInfo = level2;
 
     createEnemies();
     createPlayerShip();
 
     // Set display callback
+    glutDisplayFunc(draw);
     //glutDisplayFunc(MainMenu::draw);
-    glutDisplayFunc(MainMenu::draw);
 
     glutReshapeFunc(onWindowResize);
 
     // Set keyboard callback
+    glutKeyboardFunc(keyboard);
     //glutKeyboardFunc(MainMenu::keyboard);
-    glutKeyboardFunc(MainMenu::keyboard);
 
     // Set idle function
+    glutIdleFunc(idle);
     //glutIdleFunc(MainMenu::idle);
-    glutIdleFunc(MainMenu::idle);
 
     glutTimerFunc(16, gameTimer, 0);
 

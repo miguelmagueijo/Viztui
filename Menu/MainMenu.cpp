@@ -8,51 +8,54 @@
 
 unsigned int textureID;
 
-GLvoid loadImage() {
+GLvoid loadImage(char* imgPath) {
     glGenTextures(1, &textureID);
     glBindTexture(GL_TEXTURE_2D, textureID);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    //glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+    // OpenGL expects x:0 y:0 to be on bottom left of image, but images have x:0 y:0 on top left
+    stbi_set_flip_vertically_on_load(true);
+
+    // Read file data
     int width, height, nrChannels;
-    // Reads file
-    unsigned char *data = stbi_load("../MenuTextures/MainMenu.png", &width, &height, &nrChannels, 0);
+    unsigned char *imgData = stbi_load(imgPath, &width, &height, &nrChannels, 0);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, imgData);
 
-    stbi_image_free(data);
+    stbi_image_free(imgData);
 }
 
 GLvoid drawImageOnWorld() {
-    loadImage();
+    loadImage("../MenuTextures/MainMenu.png");
 
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    glEnable(GL_TEXTURE_2D); // enable texturing 2D
+    glBindTexture(GL_TEXTURE_2D, textureID); // set opengl to use texture stored in textureID
 
     // TexCoord S is X, T is Y, R is Z
     glBegin(GL_QUADS); {
         // Bottom Left
         glTexCoord2f(0.0, 0.0);
-        glVertex3f(worldBorders[0], worldBorders[3], 0.0f);
+        glVertex3f(WORLD_BORDERS[0], WORLD_BORDERS[2], 0.0f);
 
         // Top Left
         glTexCoord2f(0.0, 1.0);
-        glVertex3f(worldBorders[0], worldBorders[2], 0.0f);
+        glVertex3f(WORLD_BORDERS[0], WORLD_BORDERS[3], 0.0f);
 
         // Top Right
         glTexCoord2f(1.0, 1.0);
-        glVertex3f(worldBorders[1], worldBorders[2], 0.0f);
+        glVertex3f(WORLD_BORDERS[1], WORLD_BORDERS[3], 0.0f);
 
         // Bottom Right
         glTexCoord2f(1.0, 0.0);
-        glVertex3f(worldBorders[1], worldBorders[3], 0.0f);
+        glVertex3f(WORLD_BORDERS[1], WORLD_BORDERS[2], 0.0f);
     }glEnd();
 
-    glDisable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, 0);
+    glDisable(GL_TEXTURE_2D); // no need to texturize anything else
+    glBindTexture(GL_TEXTURE_2D, 0); // unload texture
 }
 
 GLvoid MainMenu::draw() {
@@ -64,7 +67,7 @@ GLvoid MainMenu::draw() {
 
     glLoadIdentity();
 
-    gluOrtho2D(worldBorders[0], worldBorders[1], worldBorders[2], worldBorders[3]);
+    gluOrtho2D(WORLD_BORDERS[0], WORLD_BORDERS[1], WORLD_BORDERS[2], WORLD_BORDERS[3]);
 
     glMatrixMode(GL_MODELVIEW);
 

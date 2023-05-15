@@ -14,9 +14,9 @@ GLvoid EnemyFire::body() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] * 4 / 5);
-        glVertex2f(enemySize[0] * 2 / 5, enemySize[1] * 4 / 5);
-        glVertex2f(enemySize[0] * 2 / 5, 0);
+        glVertex2f(0, Enemy::SIZE[1] * 4 / 5);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, Enemy::SIZE[1] * 4 / 5);
+        glVertex2f(Enemy::SIZE[0] * 2 / 5, 0);
     } glEnd();
 }
 
@@ -25,9 +25,9 @@ GLvoid EnemyFire::cockpit() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] * 2 / 5);
-        glVertex2f(enemySize[0] / 10, enemySize[1] * 2 / 5);
-        glVertex2f(enemySize[0] / 10, 0);
+        glVertex2f(0, Enemy::SIZE[1] * 2 / 5);
+        glVertex2f(Enemy::SIZE[0] / 10, Enemy::SIZE[1] * 2 / 5);
+        glVertex2f(Enemy::SIZE[0] / 10, 0);
     } glEnd();
 }
 
@@ -36,9 +36,9 @@ GLvoid EnemyFire::cannon() {
 
     glBegin(GL_QUADS); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1] / 5);
-        glVertex2f(enemySize[0] / 10, enemySize[1] / 5);
-        glVertex2f(enemySize[0] / 10, 0);
+        glVertex2f(0, Enemy::SIZE[1] / 5);
+        glVertex2f(Enemy::SIZE[0] / 10, Enemy::SIZE[1] / 5);
+        glVertex2f(Enemy::SIZE[0] / 10, 0);
     } glEnd();
 }
 
@@ -47,8 +47,8 @@ GLvoid EnemyFire::leftWing() {
 
     glBegin(GL_TRIANGLES); {
         glVertex2f(0, 0);
-        glVertex2f(0, enemySize[1]);
-        glVertex2f(enemySize[0] * 7 / 10, enemySize[1]);
+        glVertex2f(0, Enemy::SIZE[1]);
+        glVertex2f(Enemy::SIZE[0] * 7 / 10, Enemy::SIZE[1]);
     } glEnd();
 }
 
@@ -56,9 +56,9 @@ GLvoid EnemyFire::rightWing() {
     glColor3f(Enemy::SECONDARY_COLOR[0], Enemy::SECONDARY_COLOR[1], Enemy::SECONDARY_COLOR[2]);
 
     glBegin(GL_TRIANGLES); {
-        glVertex2f(enemySize[0] * 7 / 10, 0);
-        glVertex2f(0, enemySize[1]);
-        glVertex2f(enemySize[0] * 7 / 10, enemySize[1]);
+        glVertex2f(Enemy::SIZE[0] * 7 / 10, 0);
+        glVertex2f(0, Enemy::SIZE[1]);
+        glVertex2f(Enemy::SIZE[0] * 7 / 10, Enemy::SIZE[1]);
     } glEnd();
 }
 
@@ -66,28 +66,28 @@ GLvoid EnemyFire::draw() {
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-    glTranslatef(this->position[0] - enemySize[0] / 2, this->position[1] - enemySize[1] / 2, 0);
+    glTranslatef(this->position[0] - Enemy::HALF_SIZE[0], this->position[1] - Enemy::HALF_SIZE[1], 0);
 
     this->leftWing();
 
     glPushMatrix();
 
-    glTranslatef(enemySize[0] * 3 / 10, 0, 0);
+    glTranslatef(Enemy::SIZE[0] * 3 / 10, 0, 0);
     this->rightWing();
 
-    glTranslatef(0, enemySize[1] / 5, 0);
+    glTranslatef(0, Enemy::SIZE[1] / 5, 0);
     this->body();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(enemySize[0] * 9 / 20, 0, 0);
+    glTranslatef(Enemy::SIZE[0] * 9 / 20, 0, 0);
     this->cannon();
 
     glPopMatrix();
     glPushMatrix();
 
-    glTranslatef(enemySize[0] * 9 / 20, enemySize[1] * 3 / 10, 0);
+    glTranslatef(Enemy::SIZE[0] * 9 / 20, Enemy::SIZE[1] * 3 / 10, 0);
     this->cockpit();
 
     glPopMatrix();

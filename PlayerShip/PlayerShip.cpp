@@ -27,7 +27,7 @@ PlayerShip::PlayerShip(GLfloat x, GLfloat y, GLfloat speed, GLshort hp) {
     this->bullet = new Bullet(true);
     this->bullet->setSpeed(3);
     this->bullet->setDamage(5);
-    this->canFireExtra = true;
+    this->canFireExtra = false;
     this->currentAngle = 0;
 }
 
@@ -162,25 +162,25 @@ GLboolean PlayerShip::move(MOVE_DIRS dir) {
 
     switch(dir) {
         case MOVE_DIRS::UP:
-            if (this->position[1] + playerHalfHitbox[1] + this->speed < worldBorders[3]) {
+            if (this->position[1] + playerHalfHitbox[1] + this->speed < WORLD_BORDERS[3]) {
                 this->position[1] += this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::DOWN:
-            if (this->position[1] - playerHalfHitbox[1] - this->speed > worldBorders[2]) {
+            if (this->position[1] - playerHalfHitbox[1] - this->speed > WORLD_BORDERS[2]) {
                 this->position[1] -= this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::LEFT:
-            if (this->position[0] - playerHalfHitbox[0] - this->speed > worldBorders[0]) {
+            if (this->position[0] - playerHalfHitbox[0] - this->speed > WORLD_BORDERS[0]) {
                 this->position[0] -= this->speed;
                 hasMoved = true;
             }
             break;
         case MOVE_DIRS::RIGHT:
-            if (this->position[0] + playerHalfHitbox[0] + this->speed < worldBorders[1]) {
+            if (this->position[0] + playerHalfHitbox[0] + this->speed < WORLD_BORDERS[1]) {
                 this->position[0] += this->speed;
                 hasMoved = true;
             }
@@ -235,13 +235,13 @@ GLvoid PlayerShip::rotate(MOVE_DIRS rDir) {
     playerHalfHitbox[1] = tmp;
 
     // Avoid ship clipping through borders
-    if (this->position[0] - playerHalfHitbox[0] < worldBorders[0])
+    if (this->position[0] - playerHalfHitbox[0] < WORLD_BORDERS[0])
         this->position[0] += this->speed;
-    else if (this->position[0] + playerHalfHitbox[0] > worldBorders[1])
+    else if (this->position[0] + playerHalfHitbox[0] > WORLD_BORDERS[1])
         this->position[0] -= this->speed;
-    else if (this->position[1] - playerHalfHitbox[1] < worldBorders[2])
+    else if (this->position[1] - playerHalfHitbox[1] < WORLD_BORDERS[2])
         this->position[1] += this->speed;
-    else if (this->position[1] + playerHalfHitbox[1] > worldBorders[3])
+    else if (this->position[1] + playerHalfHitbox[1] > WORLD_BORDERS[3])
         this->position[1] -= this->speed;
 
     if (abs(this->currentAngle) >= 360) {

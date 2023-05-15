@@ -22,7 +22,8 @@ protected:
     Pickup* pickup;
 
 public:
-    static constexpr GLfloat size[2] { 20,  10};
+    const static GLfloat SIZE[2];
+    const static GLfloat HALF_SIZE[2];
 
     Enemy(GLfloat x, GLfloat y, GLfloat hp);
     ~Enemy() = default;
