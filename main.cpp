@@ -23,6 +23,7 @@ const GLfloat ASPECT_RATIO = windowSize[0] / windowSize[1];
 GLfloat halfWindowSize[2] = { static_cast<GLfloat>(windowSize[0] / 2), static_cast<GLfloat>(windowSize[1] / 2) };
 // World Borders by order Left, Right, Bottom, Up
 GLfloat worldBorders[4] = { -125, 125, -125, 125 };
+const GLfloat offsetWBLines = 0.002f; // offset to draw world borders lines
 
 // Sizes
 GLfloat enemySize[2] = { 20, 10 }; // All enemies are the same size. Size ratio is 2:1 (Size is 20:10)
@@ -35,6 +36,7 @@ GLboolean frameTimerUp = false;
 GLboolean needsDraw = false;
 GLboolean areEnemiesMovingLeft = false;
 GLboolean playerCanFire = true;
+GLboolean playerCanRotate = true;
 GLboolean enemyCanFire = true;
 MOVE_DIRS enemyMoveDir = MOVE_DIRS::RIGHT;
 GLint currEnemyCountDown = 0;
@@ -68,10 +70,10 @@ GLvoid setupLevels() {
 
     // Level 2
     level2->enemyBorderHitMax = 3;
-    level2->enemySpeed = 1.5f;
+    level2->enemySpeed = 1.10f;
     level2->pickupSpeed = 1.25f;
     level2->enemySpeedIncremental = 0.1f;
-    level2->occupiedPercentageX = 70;
+    level2->occupiedPercentageX = 90;
     level2->numWaves = 2;
     level2->enemyTypePerLine = { { 0, 0, 1 }, { 0, 1, 1 } };
     level2->enemyHpPerWave = { { 20, 30, 0 }, { 20, 30, 0 } };
@@ -88,6 +90,10 @@ GLvoid enemyFireTimer(GLint value) {
 
 GLvoid playerFireTimer(GLint value) {
     playerCanFire = true;
+}
+
+GLvoid playerRotateTimer(GLint value) {
+    playerCanRotate = true;
 }
 
 // Checks if object 1 (pos1, offset1) colliding with object 2 (pos2, offset2)
@@ -226,6 +232,28 @@ GLvoid triggerGameVictory() {
     std::cout << "You won!" << std::endl;
 }
 
+GLvoid drawWorldBorders() {
+    glColor3f(0.25f, 0.25f, 0.25f);
+
+    glBegin(GL_LINES); {
+        // Left Border
+        glVertex2f(worldBorders[0] + offsetWBLines, worldBorders[2]);
+        glVertex2f(worldBorders[0] + offsetWBLines, worldBorders[3]);
+
+        // Right Border
+        glVertex2f(worldBorders[1] - offsetWBLines, worldBorders[2]);
+        glVertex2f(worldBorders[1] - offsetWBLines, worldBorders[3]);
+
+        // Bottom Border
+        glVertex2f(worldBorders[0], worldBorders[2] + offsetWBLines);
+        glVertex2f(worldBorders[1], worldBorders[2] + offsetWBLines);
+
+        // Top Border
+        glVertex2f(worldBorders[0], worldBorders[3] - offsetWBLines);
+        glVertex2f(worldBorders[1], worldBorders[3] - offsetWBLines);
+    } glEnd();
+}
+
 GLvoid draw(GLvoid) {
     // Define background color
     glClearColor(0, 0, 0, 255);
@@ -247,6 +275,8 @@ GLvoid draw(GLvoid) {
 
     // load identity matrix
     glLoadIdentity();
+
+    drawWorldBorders();
 
     for (Pickup* p : pickups) {
         p->draw();
@@ -523,13 +553,21 @@ GLvoid keyboard(unsigned char key, int x, int y) {
             break;
         case 'Q':
         case 'q':
-            playerShip->rotate(MOVE_DIRS::LEFT);
-            needsDraw = true;
+            if (playerCanRotate) {
+                playerShip->rotate(MOVE_DIRS::LEFT);
+                needsDraw = true;
+                playerCanRotate = false;
+                glutTimerFunc(250, playerRotateTimer, 0);
+            }
             break;
         case 'E':
         case 'e':
-            playerShip->rotate(MOVE_DIRS::RIGHT);
-            needsDraw = true;
+            if (playerCanRotate) {
+                playerShip->rotate(MOVE_DIRS::RIGHT);
+                needsDraw = true;
+                playerCanRotate = false;
+                glutTimerFunc(250, playerRotateTimer, 0);
+            }
             break;
         case ' ':
             if (playerCanFire) {
