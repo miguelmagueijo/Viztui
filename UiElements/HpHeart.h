@@ -17,8 +17,8 @@ private:
     GLvoid bottomTriangle();
 
 public:
-    static GLfloat hpHeartSize[2]; // Size ratio is 4:5
-    static GLfloat hpHeartHalfSize[2];
+    const static GLfloat SIZE[2]; // Size ratio is 4:5
+    const static GLfloat HALF_SIZE[2];
 
     HpHeart(GLfloat x, GLfloat y);
     ~HpHeart() = default;

@@ -7,8 +7,10 @@
 
 #include "../Viztui.lib.h"
 
-GLvoid openMainMenu();
-GLvoid openHelpMenu();
-GLvoid openNormalLvlMenu();
+namespace MenuController {
+    GLvoid openMainMenu();
+    GLvoid openHelpMenu();
+    GLvoid openNormalLvlMenu();
+}
 
 #endif //VIZTUI_MENUCONTROLLER_H
