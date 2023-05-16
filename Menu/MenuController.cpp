@@ -8,6 +8,7 @@
 
 // 0 -> controls, 1 -> enemies, 2 -> pickups
 GLint helpCurrTab = 0;
+std::vector<GLint> lvlScores = {};
 
 unsigned int textureID;
 
@@ -123,7 +124,40 @@ GLvoid drawHelpMenu() {
 }
 
 GLvoid drawNormalLvlMenu() {
+    glClearColor(0, 0, 0, 255);
 
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glMatrixMode(GL_PROJECTION);
+
+    glLoadIdentity();
+
+    gluOrtho2D(WORLD_BORDERS[0], WORLD_BORDERS[1], WORLD_BORDERS[2], WORLD_BORDERS[3]);
+
+    glMatrixMode(GL_MODELVIEW);
+
+    glLoadIdentity();
+
+    switch (lvlScores.size()) {
+        case 0:
+            drawImgOnEntireWorld("../MenuTextures/NormalMenu_0.png");
+            break;
+        case 1:
+            drawImgOnEntireWorld("../MenuTextures/NormalMenu_1.png");
+            break;
+        case 2:
+            drawImgOnEntireWorld("../MenuTextures/NormalMenu_2.png");
+            break;
+        case 3:
+            drawImgOnEntireWorld("../MenuTextures/NormalMenu_3.png");
+            break;
+        default:
+            std::cout << "[DEBUG] More scores registers than levels!" << std::endl;
+            drawImgOnEntireWorld("../MenuTextures/NormalMenu_0.png");
+            break;
+    }
+
+    glutSwapBuffers();
 }
 
 
@@ -136,6 +170,7 @@ GLvoid keyboardMainMenu(unsigned char key, int x, int y) {
     switch (key) {
         case 'N':
         case 'n':
+            openNormalLvlMenu();
             break;
         case 'E':
         case 'e':
@@ -158,20 +193,26 @@ GLvoid keyboardMainMenu(unsigned char key, int x, int y) {
 
 GLvoid keyboardHelpMenu(unsigned char key, int x, int y) {
     switch (key) {
+        case 9: // tab, iterates tabs
+            if (++helpCurrTab > 2) {
+                helpCurrTab = 0;
+            }
+            glutPostRedisplay();
+            break;
         case 'C':
         case 'c':
             helpCurrTab = 0;
-            drawHelpMenu();
+            glutPostRedisplay();
             break;
         case 'E':
         case 'e':
             helpCurrTab = 1;
-            drawHelpMenu();
+            glutPostRedisplay();
             break;
         case 'P':
         case 'p':
             helpCurrTab = 2;
-            drawHelpMenu();
+            glutPostRedisplay();
             break;
         case 'B':
         case 'b':
@@ -181,7 +222,34 @@ GLvoid keyboardHelpMenu(unsigned char key, int x, int y) {
 }
 
 GLvoid keyboardNormalLvlMenu(unsigned char key, int x, int y) {
+    switch (key) {
+        case '-':
+            lvlScores.push_back(9999);
+            glutPostRedisplay();
+            break;
+        case '.':
+            lvlScores.clear();
+            glutPostRedisplay();
+            break;
+        case '1':
+            helpCurrTab = 0;
+            drawHelpMenu();
+            break;
+        case '2':
+            if (lvlScores.empty())
+                break;
 
+            break;
+        case '3':
+            if (lvlScores.size() < 2)
+                break;
+
+            break;
+        case 'B':
+        case 'b':
+        case 27:
+            openMainMenu();
+    }
 }
 
 /* #####################################################################################################################
@@ -193,7 +261,7 @@ GLvoid openMainMenu() {
     glutKeyboardFunc(keyboardMainMenu);
     glutIdleFunc(nullptr);
 
-    drawMainMenu();
+    glutPostRedisplay();
 }
 
 GLvoid openHelpMenu() {
@@ -202,7 +270,7 @@ GLvoid openHelpMenu() {
     helpCurrTab = 0; // opens controls by default
     glutIdleFunc(nullptr);
 
-    drawHelpMenu();
+    glutPostRedisplay();
 }
 
 GLvoid openNormalLvlMenu() {
@@ -210,5 +278,5 @@ GLvoid openNormalLvlMenu() {
     glutKeyboardFunc(keyboardNormalLvlMenu);
     glutIdleFunc(nullptr);
 
-    drawNormalLvlMenu();
+    glutPostRedisplay();
 }
